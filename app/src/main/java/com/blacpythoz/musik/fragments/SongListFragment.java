@@ -1,47 +1,46 @@
-package com.blacpythoz.musik;
+package com.blacpythoz.musik.fragments;
 
 import android.Manifest;
 import android.content.ContentUris;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
-import android.graphics.drawable.Drawable;
-
 import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Handler;
 import android.provider.MediaStore;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
-import android.support.v7.app.AppCompatActivity;
+import android.support.v4.app.Fragment;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.PopupMenu;
 import android.support.v7.widget.RecyclerView;
+import android.view.LayoutInflater;
+import android.view.ViewGroup;
 import android.widget.ImageButton;
-import android.widget.SearchView;
+
 import android.util.Log;
-import android.view.Menu;
-import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
-import android.widget.Toast;
 
+import com.blacpythoz.musik.R;
+import com.blacpythoz.musik.models.SongModel;
+import com.blacpythoz.musik.adapters.SongAdapter;
 import com.squareup.picasso.Picasso;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Random;
 
-public class SongListActivity extends AppCompatActivity {
+public class SongListFragment extends Fragment {
 
     RecyclerView recyclerView;
     ArrayList<SongModel> songs;
     SongAdapter adapter;
-    boolean permissionStat = false;
     MediaPlayer mediaPlayer;
     Handler handler=new Handler();
     ImageView actionBtn;
@@ -49,28 +48,30 @@ public class SongListActivity extends AppCompatActivity {
     TextView currentSong;
     ImageView ivActionSongCoverArt;
 
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.song_list_layout);
+    @Nullable
+    @Override
+    public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+        View rootview = inflater.inflate(R.layout.song_list_layout, container, false);
+
         songs=new ArrayList<>();
         mediaPlayer=new MediaPlayer();
-        actionBtn=(ImageView)findViewById(R.id.iv_action_btn);
-        progressBar=(ProgressBar)findViewById(R.id.pb_song_duration);
+        actionBtn=(ImageView)rootview.findViewById(R.id.iv_action_btn);
+        progressBar=(ProgressBar)rootview.findViewById(R.id.pb_song_duration);
 
-        recyclerView=(RecyclerView)findViewById(R.id.rv_song_list);
-        currentSong=(TextView)findViewById(R.id.tv_current_song_name);
-        ivActionSongCoverArt=(ImageView)findViewById(R.id.iv_action_song_cover);
+        recyclerView=(RecyclerView)rootview.findViewById(R.id.rv_song_list);
+        currentSong=(TextView)rootview.findViewById(R.id.tv_current_song_name);
+        ivActionSongCoverArt=(ImageView)rootview.findViewById(R.id.iv_action_song_cover);
 
-        adapter=new SongAdapter(songs,getApplicationContext());
-        LinearLayoutManager linearLayoutManager = new LinearLayoutManager(this);
+        adapter=new SongAdapter(songs,getContext());
+        LinearLayoutManager linearLayoutManager = new LinearLayoutManager(getActivity());
         recyclerView.setLayoutManager(linearLayoutManager);
         recyclerView.setAdapter(adapter);
+        loadSongs();
+        return rootview;
+    }
 
-        checkPermission();
-        if(permissionStat) {
-            loadSongs();
-        }
-
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
     }
 
     public void handleActionListener() {
@@ -94,9 +95,6 @@ public class SongListActivity extends AppCompatActivity {
                 }
             }
         });
-
-
-
     }
 
     public void handleSongClick() {
@@ -122,7 +120,7 @@ public class SongListActivity extends AppCompatActivity {
         adapter.setOnSongBtnClickListener(new SongAdapter.SongBtnClickListener() {
             @Override
             public void onSongBtnClickListener(ImageButton btn, View v, final SongModel song, int pos) {
-                final PopupMenu popupMenu=new PopupMenu(SongListActivity.this,btn);
+                final PopupMenu popupMenu=new PopupMenu(getContext(),btn);
                 popupMenu.getMenuInflater().inflate(R.menu.song_action_menu,popupMenu.getMenu());
                 popupMenu.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
 
@@ -143,9 +141,8 @@ public class SongListActivity extends AppCompatActivity {
     public void playSong(final SongModel song) {
         // set text and image in bottom action bar
         currentSong.setText(song.getSongName());
-        Picasso.with(getApplicationContext()).load(song.getAlbumArt()).into(ivActionSongCoverArt);
+        Picasso.with(getContext()).load(song.getAlbumArt()).into(ivActionSongCoverArt);
         actionBtn.setBackgroundResource(R.drawable.ic_media_pause);
-
 
         Runnable r = new Runnable() {
             @Override
@@ -193,7 +190,7 @@ public class SongListActivity extends AppCompatActivity {
         Uri uri= MediaStore.Audio.Media.EXTERNAL_CONTENT_URI;
         String selection=MediaStore.Audio.Media.IS_MUSIC+"!=0";
         String sortOrder=MediaStore.Audio.Media.TITLE+" ASC";
-        Cursor cursor= getContentResolver().query(uri,null,selection,null,sortOrder);
+        Cursor cursor= getActivity().getContentResolver().query(uri,null,selection,null,sortOrder);
         int songNameColumnIndex=cursor.getColumnIndex(MediaStore.Audio.Media.TITLE);
         int artistNameColumnIndex=cursor.getColumnIndex(MediaStore.Audio.Media.ARTIST);
         int songUriIndex=cursor.getColumnIndex(MediaStore.Audio.Media.DATA);
@@ -220,32 +217,6 @@ public class SongListActivity extends AppCompatActivity {
         t.start();
     }
 
-    public void checkPermission() {
-        if(Build.VERSION.SDK_INT >= 23) {
-            if(ActivityCompat.checkSelfPermission(getApplicationContext(), Manifest.permission.READ_EXTERNAL_STORAGE)!= PackageManager.PERMISSION_GRANTED) {
-                requestPermissions(new String[]{Manifest.permission.READ_EXTERNAL_STORAGE},123);
-            } else {
-                permissionStat=true;
-            }
-        } else {
-            permissionStat=true;
-        }
-    }
-
-    @Override
-    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
-        if(requestCode==123) {
-            if(grantResults[0]==PackageManager.PERMISSION_GRANTED) {
-                permissionStat=true;
-                loadSongs();
-            } else {
-                permissionStat=false;
-            }
-        }else {
-            super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-        }
-    }
-
     private class SongProgressBarThread extends Thread {
         @Override
         public void run() {
@@ -262,27 +233,5 @@ public class SongListActivity extends AppCompatActivity {
         }
     }
 
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        MenuInflater menuInflater=getMenuInflater();
-        menuInflater.inflate(R.menu.songmenu,menu);
 
-        MenuItem menuItem=menu.findItem(R.id.searchSongItem);
-        SearchView searchView = (SearchView)menuItem.getActionView();
-
-        searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
-
-            @Override
-            public boolean onQueryTextSubmit(String query) {
-                return true;
-            }
-
-            @Override
-            public boolean onQueryTextChange(String newText) {
-                adapter.filter(newText);
-                return false;
-            }
-        });
-        return super.onCreateOptionsMenu(menu);
-    }
 }

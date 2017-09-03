@@ -1,4 +1,4 @@
-package com.blacpythoz.musik;
+package com.blacpythoz.musik.models;
 
 /**
  * Created by deadsec on 9/2/17.
