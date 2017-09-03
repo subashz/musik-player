@@ -1,9 +1,13 @@
 package com.blacpythoz.musik.activities;
 
 import android.Manifest;
+import android.content.ComponentName;
+import android.content.Context;
 import android.content.Intent;
+import android.content.ServiceConnection;
 import android.content.pm.PackageManager;
 import android.os.Build;
+import android.os.IBinder;
 import android.support.annotation.NonNull;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.ActivityCompat;
@@ -21,20 +25,24 @@ import com.blacpythoz.musik.fragments.AlbumListFragment;
 import com.blacpythoz.musik.fragments.ArtistListFragment;
 import com.blacpythoz.musik.fragments.PlayListFragment;
 import com.blacpythoz.musik.fragments.SongListFragment;
+import com.blacpythoz.musik.services.MusicService;
 
 public class MainActivity extends AppCompatActivity {
 
     private SectionsPageAdapter sectionsPageAdapter;
     private ViewPager viewPager;
     private TabLayout tabLayout;
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        if(checkPermission()) {
+        if (checkPermission()) {
             handleAllView();
         }
     }
+
 
     public void handleAllView() {
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
