@@ -21,6 +21,7 @@ import com.blacpythoz.musik.R;
 import com.blacpythoz.musik.activities.MainActivity;
 import com.blacpythoz.musik.interfaces.PlayBackInterface;
 import com.blacpythoz.musik.loader.DataLoader;
+import com.blacpythoz.musik.models.AlbumModel;
 import com.blacpythoz.musik.models.ArtistModel;
 import com.blacpythoz.musik.models.SongModel;
 import java.util.ArrayList;
@@ -36,7 +37,7 @@ public class MusicService extends Service implements
 
     private MediaPlayer player;
     private ArrayList<SongModel> songs;
-    private ArrayList<ArtistModel> artists;
+    private ArrayList<AlbumModel> albums;
     private int songPosn;
     private SongModel currentSong;
     Callback callback;
@@ -103,7 +104,7 @@ public class MusicService extends Service implements
                 PowerManager.PARTIAL_WAKE_LOCK);
         player.setAudioStreamType(AudioManager.STREAM_MUSIC);
         loadMedia();
-        loadArtist();
+        loadAlbum();
         Log.i("Services: ","initMusicPlayer()");
     }
 
@@ -164,14 +165,15 @@ public class MusicService extends Service implements
         songs= DataLoader.getSongs(this);
     }
 
-    public void loadArtist() {
-//        artists = DataLoader.getArtists(this);
+    public void loadAlbum() {
+        albums = DataLoader.getAlbums(this);
     }
 
     @Override
     public ArrayList<SongModel> getSongs() {
         return this.songs;
     }
+    public ArrayList<AlbumModel> getAlbums() { return this.albums; }
 
     @Override
     public void start() {

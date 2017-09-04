@@ -29,7 +29,6 @@ import com.blacpythoz.musik.adapters.SongAdapter;
 import com.blacpythoz.musik.services.MusicService;
 import com.squareup.picasso.Picasso;
 import java.util.ArrayList;
-import java.util.Random;
 
 public class SongListFragment extends Fragment {
 
@@ -56,7 +55,7 @@ public class SongListFragment extends Fragment {
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        View rootview = inflater.inflate(R.layout.song_list_layout, container, false);
+        View rootview = inflater.inflate(R.layout.fragment_song_list, container, false);
         songs=new ArrayList<>();
         actionBtn=(ImageView)rootview.findViewById(R.id.iv_action_btn);
         progressBar=(ProgressBar)rootview.findViewById(R.id.pb_song_duration);

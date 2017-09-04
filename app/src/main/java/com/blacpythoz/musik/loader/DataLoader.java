@@ -37,7 +37,7 @@ public class DataLoader {
             String title = cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.TITLE));
             String artistName = cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.TITLE));
             String composer = cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.TITLE));
-            String albumName = cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.TITLE));
+            String albumName = cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.ALBUM));
             String data = cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.DATA));
             int trackNumber = cursor.getInt(cursor.getColumnIndex(MediaStore.Audio.Media.TRACK));
             int year = cursor.getInt(cursor.getColumnIndex(MediaStore.Audio.Media.YEAR));
@@ -61,19 +61,39 @@ public class DataLoader {
     }
 
     // incomplete get artist context
-//    public static ArrayList<ArtistModel>  getArtists(Context context) {
-//        ArrayList<SongModel> songs = getSongs(context);
-//
-//        ArrayList<AlbumModel> albums = new ArrayList<>();
-//        ArrayList<SongModel> sameAlbumSong = new ArrayList<>();
-//
-//        for(SongModel song: songs) {
-//            if(song.getAlbumId())
-//
-//
-//
+    public static ArrayList<AlbumModel>  getAlbums(Context context) {
+        ArrayList<SongModel> songs = getSongs(context);
+
+        // Organize song as: {albumId=>{song,song,song},albumId=>{song,song}}
+        Map<Integer,ArrayList<SongModel>> albumMap=new HashMap<>();
+        ArrayList<AlbumModel> allAlbums = new ArrayList<>();
+        for(SongModel song: songs) {
+            if (albumMap.get(song.getAlbumId()) == null) {
+                albumMap.put(song.getAlbumId(), new ArrayList<SongModel>());
+                albumMap.get(song.getAlbumId()).add(song);
+            } else {
+                albumMap.get(song.getAlbumId()).add(song);
+            }
+        }
+
+        // Extracting and mapping the songlist
+        for (Map.Entry<Integer, ArrayList<SongModel>> entry : albumMap.entrySet()) {
+            ArrayList<SongModel> albumSpecificSongs = new ArrayList<>();
+            for(SongModel song: entry.getValue()) {
+                albumSpecificSongs.add(song);
+            }
+            allAlbums.add(new AlbumModel(albumSpecificSongs));
+        }
+
+//          Debugging Code
+//        for(AlbumModel k:allAlbums) {
+//            for(SongModel song: k.getAlbumSongs()) {
+//                Log.i("Test","Album Title: "+song.getAlbumName()+"Album ID: "+song.getAlbumId()+" Song Name: "+song.getTitle());
+//            }
 //        }
-//        return artists;
-//    }
+//        Log.i("All Albums list: ",allAlbums.size()+"");
+
+        return allAlbums;
+    }
 
 }
