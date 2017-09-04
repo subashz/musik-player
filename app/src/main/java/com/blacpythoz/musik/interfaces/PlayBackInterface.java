@@ -35,10 +35,6 @@ public interface PlayBackInterface {
 
     interface Callback {
         void onCompletion(SongModel song);
-
-        void onPlaybackStatusChanged(int state);
-
-        void onError(String error);
     }
 
     void setCallback(Callback callback);

@@ -60,7 +60,6 @@ public class MainActivity extends AppCompatActivity {
         adapter.addFragment(new AlbumListFragment(),"Albums");
         adapter.addFragment(new ArtistListFragment(),"Artist");
         adapter.addFragment(new PlayListFragment(),"PlayList");
-
         viewPager.setAdapter(adapter);
     }
 

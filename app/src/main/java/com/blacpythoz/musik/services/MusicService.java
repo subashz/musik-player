@@ -20,8 +20,11 @@ import android.widget.Toast;
 import com.blacpythoz.musik.R;
 import com.blacpythoz.musik.activities.MainActivity;
 import com.blacpythoz.musik.interfaces.PlayBackInterface;
+import com.blacpythoz.musik.loader.DataLoader;
+import com.blacpythoz.musik.models.ArtistModel;
 import com.blacpythoz.musik.models.SongModel;
 import java.util.ArrayList;
+import java.util.Random;
 
 /**
  * Created by deadsec on 9/3/17.
@@ -33,6 +36,7 @@ public class MusicService extends Service implements
 
     private MediaPlayer player;
     private ArrayList<SongModel> songs;
+    private ArrayList<ArtistModel> artists;
     private int songPosn;
     private SongModel currentSong;
     Callback callback;
@@ -50,10 +54,10 @@ public class MusicService extends Service implements
         songPosn = 0;
         player = new MediaPlayer();
         songs=new ArrayList<>();
-        currentSong=new SongModel(null,null,null,null);
+        currentSong=SongModel.EMPTY();
         initMusicPlayer();
         Log.i("Services:","OnCreate()");
-        if(currentSong.getSongName() != null) {
+        if(currentSong.getTitle() != null) {
             Log.i("Start","Re-come here");
             player.start();
         }
@@ -64,18 +68,25 @@ public class MusicService extends Service implements
         String LOG_TAG="service_tag";
        if (intent.getAction().equals("action.prev")) {
             Log.i(LOG_TAG, "Clicked Previous");
+           playPrev();
+           showNotification();
             Toast.makeText(this, "Clicked Previous!", Toast.LENGTH_SHORT).show();
 
         } else if (intent.getAction().equals("action.play")) {
             Log.i(LOG_TAG, "Clicked Play");
+           showNotification();
+           start();
             Toast.makeText(this, "Clicked Play!", Toast.LENGTH_SHORT).show();
 
         } else if (intent.getAction().equals("action.next")){
             Log.i(LOG_TAG, "Clicked Next");
+           playNext();
+           showNotification();
             Toast.makeText(this, "Clicked Next!", Toast.LENGTH_SHORT).show();
 
         } else if (intent.getAction().equals("action.stop")) {
             Log.i(LOG_TAG, "Received Stop Foreground Intent");
+           stop();
             stopForeground(true);
             stopSelf();
         }
@@ -92,6 +103,7 @@ public class MusicService extends Service implements
                 PowerManager.PARTIAL_WAKE_LOCK);
         player.setAudioStreamType(AudioManager.STREAM_MUSIC);
         loadMedia();
+        loadArtist();
         Log.i("Services: ","initMusicPlayer()");
     }
 
@@ -99,6 +111,13 @@ public class MusicService extends Service implements
         songs=theSongs;
     }
 
+    public void playNext() {
+        play(songPosn+1);
+    }
+
+    public void playPrev() {
+        play(songPosn-1);
+    }
     @Override
     public void onCompletion(MediaPlayer mediaPlayer) {
         if(callback != null) {
@@ -142,28 +161,11 @@ public class MusicService extends Service implements
 
     @Override
     public void loadMedia() {
-        Uri uri= MediaStore.Audio.Media.EXTERNAL_CONTENT_URI;
-        String selection=MediaStore.Audio.Media.IS_MUSIC+"!=0";
-        String sortOrder=MediaStore.Audio.Media.TITLE+" ASC";
-        Cursor cursor= getContentResolver().query(uri,null,selection,null,sortOrder);
-        int songNameColumnIndex=cursor.getColumnIndex(MediaStore.Audio.Media.TITLE);
-        int artistNameColumnIndex=cursor.getColumnIndex(MediaStore.Audio.Media.ARTIST);
-        int songUriIndex=cursor.getColumnIndex(MediaStore.Audio.Media.DATA);
-        // album arts
-        Uri sArtworkUri = Uri.parse("content://media/external/audio/albumart");
-        int songAlbumIndex=cursor.getColumnIndex(MediaStore.Audio.Media.ALBUM_ID);
-        cursor.moveToFirst();
-        songs.clear();
-        do{
-            String songName = cursor.getString(songNameColumnIndex);
-            String artistName=cursor.getString(artistNameColumnIndex);
-            String albumArt=cursor.getString(songAlbumIndex);
-            // for album arts
-            Uri artUri = ContentUris.withAppendedId(sArtworkUri,Long.parseLong(albumArt));
-            String songUri=cursor.getString(songUriIndex);
-            this.songs.add(new SongModel(songName,artistName,songUri,artUri.toString()));
-        }while(cursor.moveToNext());
-        cursor.close();
+        songs= DataLoader.getSongs(this);
+    }
+
+    public void loadArtist() {
+//        artists = DataLoader.getArtists(this);
     }
 
     @Override
@@ -171,9 +173,14 @@ public class MusicService extends Service implements
         return this.songs;
     }
 
-
     @Override
     public void start() {
+        // Randomly play the song
+        if(currentSong.getTitle()==null) {
+            Random random = new Random();
+            int pos = random.nextInt(songs.size() - 1);
+            play(songs.get(pos));
+        }
         player.start();
     }
 
@@ -185,6 +192,10 @@ public class MusicService extends Service implements
     @Override
     public void setState(int state) {
         //
+    }
+
+    public String getCurrentSongName(){
+        return currentSong.getTitle();
     }
 
     @Override
@@ -218,7 +229,7 @@ public class MusicService extends Service implements
         player.reset();
         SongModel playSong = songs.get(pos);
         try{
-            player.setDataSource(playSong.getSongUrl());
+            player.setDataSource(playSong.getData());
             Log.i("Service","Playing From Service");
         }
         catch(Exception e){
@@ -232,8 +243,7 @@ public class MusicService extends Service implements
         currentSong=song;
         player.reset();
         try{
-            player.setDataSource(song.getSongUrl());
-            Log.i("Service","Playing From Service");
+            player.setDataSource(song.getData());
         }
         catch(Exception e){
             Log.e("MUSIC SERVICE", "Error setting data source", e);
@@ -257,8 +267,8 @@ public class MusicService extends Service implements
         this.callback=callback;
     }
 
-    public void showNotification() {
 
+    public void showNotification() {
         Intent notificationIntent = new Intent(this, MainActivity.class);
         notificationIntent.setAction("action.main");
         notificationIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK
@@ -283,9 +293,9 @@ public class MusicService extends Service implements
 
 //        Bitmap icon = BitmapFactory.decodeFile(currentSong.getAlbumArt());
         Notification notification = new NotificationCompat.Builder(this)
-                .setContentTitle("Music Player")
-                .setTicker("Song Name: "+currentSong.getSongName())
-                .setContentText("Artist Name: "+currentSong.getArtistName())
+                .setContentTitle(currentSong.getTitle())
+                .setTicker(currentSong.getTitle())
+                .setContentText(currentSong.getArtistName())
                 .setSmallIcon(R.drawable.music_icon)
 //                .setLargeIcon(Bitmap.createScaledBitmap(icon, 128, 128, false))
                 .setContentIntent(pendingIntent)

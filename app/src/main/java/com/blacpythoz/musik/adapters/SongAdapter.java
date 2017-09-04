@@ -44,7 +44,7 @@ public class SongAdapter extends RecyclerView.Adapter<SongAdapter.ViewHolder>{
     @Override
     public void onBindViewHolder(final SongAdapter.ViewHolder holder, final int position) {
         final SongModel song=songs.get(position);
-        holder.tvSongName.setText(song.getSongName());
+        holder.tvSongName.setText(song.getTitle());
         holder.tvArtistName.setText(song.getArtistName());
 
         if(song.getAlbumArt() != "") {
@@ -141,7 +141,7 @@ public class SongAdapter extends RecyclerView.Adapter<SongAdapter.ViewHolder>{
         else
         {
             for (SongModel song : dbSongs) {
-                if (song.getSongName().toLowerCase().contains(filterKey) || song.getArtistName().toLowerCase().contains(filterKey)) {
+                if (song.getTitle().toLowerCase().contains(filterKey) || song.getArtistName().toLowerCase().contains(filterKey)) {
                     filteredSongs.add(song);
                 }
             }

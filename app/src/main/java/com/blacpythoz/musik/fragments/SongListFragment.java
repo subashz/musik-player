@@ -46,6 +46,7 @@ public class SongListFragment extends Fragment {
     //testing services
     private MusicService musicSrv;
     private Intent playIntent;
+    ServiceConnection musicConnection;
     private boolean musicBound=false;
 
     Activity mainActivity = (MainActivity)getActivity();
@@ -67,26 +68,17 @@ public class SongListFragment extends Fragment {
         LinearLayoutManager linearLayoutManager = new LinearLayoutManager(getActivity());
         recyclerView.setLayoutManager(linearLayoutManager);
         recyclerView.setAdapter(adapter);
+
+        Log.d("Fragment","onCreateView");
+
+        // if the service is already connected then initialize the players.
+        if(musicBound) {
+            initPlayer();
+        }
+
         return rootview;
     }
 
-    //service handling
-    ServiceConnection musicConnection = new ServiceConnection() {
-        @Override
-        public void onServiceConnected(ComponentName name, IBinder service) {
-            MusicService.MusicBinder binder = (MusicService.MusicBinder) service;
-            musicSrv = binder.getService();
-            initPlayer();
-            musicBound = true;
-        }
-
-        @Override
-        public void onServiceDisconnected(ComponentName name) {
-            musicBound = false;
-        }
-    };
-
-    //for services
     @Override
     public void onStart() {
         super.onStart();
@@ -97,6 +89,7 @@ public class SongListFragment extends Fragment {
             ((MainActivity)getActivity()).bindService(playIntent, musicConnection, Context.BIND_AUTO_CREATE);
             ((MainActivity)getActivity()).startService(playIntent);
         }
+        Log.d("Fragment","onStart()");
     }
 
     @Override
@@ -104,23 +97,36 @@ public class SongListFragment extends Fragment {
         //((MainActivity)getActivity()).stopService(playIntent);
         ((MainActivity)getActivity()).unbindService(musicConnection);
         super.onDestroy();
+        Log.d("Fragment","onDestroy()");
     }
 
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        musicConnection= new ServiceConnection() {
+            @Override
+            public void onServiceConnected(ComponentName name, IBinder service) {
+                MusicService.MusicBinder binder = (MusicService.MusicBinder) service;
+                musicSrv = binder.getService();
+                initPlayer();
+                Log.i("Fragment","Connected to service");
+                musicBound = true;
+            }
+
+            @Override
+            public void onServiceDisconnected(ComponentName name) {
+                musicBound = false;
+                Log.i("Fragment","ServiceDisconnected");
+            }
+        };
+        Log.d("Fragment","onCreate()");
+
     }
 
     public void handleActionListener() {
         actionBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                // Randomly play the song if the Media Player
-                // has no length i.e this is the first launch
-//                if(musicSrv.getDuration()<=0) {
-//                    Random random = new Random();
-//                     int pos=random.nextInt(songs.size()-1);
-//                     playSong(songs.get(pos));
-//                }
+
                 if(musicSrv.isPlaying()) {
                     actionBtn.setBackgroundResource(R.drawable.ic_media_play);
                     musicSrv.pause();
@@ -139,16 +145,6 @@ public class SongListFragment extends Fragment {
 //                currentSong.setText(song.getSongName());
 //                Picasso.with(getContext()).load(song.getAlbumArt()).into(ivActionSongCoverArt);
             }
-
-            @Override
-            public void onPlaybackStatusChanged(int state) {
-
-            }
-
-            @Override
-            public void onError(String error) {
-
-            }
         });
     }
 
@@ -158,7 +154,7 @@ public class SongListFragment extends Fragment {
         adapter.setOnSongItemClickListener(new SongAdapter.SongItemClickListener() {
             @Override
             public void onSongItemClick(View v, SongModel song, final int pos) {
-                Log.i("Song Clicked is: ",song.getSongName());
+                Log.i("Song Clicked is: ",song.getTitle());
                 playSong(song);
             }
         });
@@ -207,7 +203,7 @@ public class SongListFragment extends Fragment {
     public void playSong(SongModel song) {
         musicSrv.play(song);
         progressBar.setMax((int)musicSrv.getDuration());
-        currentSong.setText(song.getSongName());
+        currentSong.setText(song.getTitle());
         Picasso.with(getContext()).load(song.getAlbumArt()).into(ivActionSongCoverArt);
     }
 
