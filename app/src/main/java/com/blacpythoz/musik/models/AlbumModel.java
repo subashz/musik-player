@@ -38,4 +38,19 @@ public class AlbumModel {
             return " ";
         }
     }
+
+    public int getArtistId() {
+        if(songs.size()>0) {
+            return songs.get(0).getArtistId();
+        }else {
+            return 0;
+        }
+    }
+    public String getArtistName() {
+     if(songs.size()>0) {
+            return songs.get(0).getArtistName();
+        }else {
+            return "";
+        }
+    }
 }

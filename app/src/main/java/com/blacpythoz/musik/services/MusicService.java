@@ -2,16 +2,12 @@ package com.blacpythoz.musik.services;
 import android.app.Notification;
 import android.app.PendingIntent;
 import android.app.Service;
-import android.content.ContentUris;
 import android.content.Intent;
-import android.database.Cursor;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
-import android.net.Uri;
 import android.os.Binder;
 import android.os.IBinder;
 import android.os.PowerManager;
-import android.provider.MediaStore;
 import android.support.annotation.Nullable;
 import android.support.v4.app.NotificationCompat;
 import android.util.Log;
@@ -19,11 +15,13 @@ import android.widget.Toast;
 
 import com.blacpythoz.musik.R;
 import com.blacpythoz.musik.activities.MainActivity;
-import com.blacpythoz.musik.interfaces.PlayBackInterface;
+import com.blacpythoz.musik.activities.SettingsActivity;
+import com.blacpythoz.musik.interfaces.PlayerInterface;
 import com.blacpythoz.musik.loader.DataLoader;
 import com.blacpythoz.musik.models.AlbumModel;
 import com.blacpythoz.musik.models.ArtistModel;
 import com.blacpythoz.musik.models.SongModel;
+
 import java.util.ArrayList;
 import java.util.Random;
 
@@ -33,15 +31,18 @@ import java.util.Random;
 
 public class MusicService extends Service implements
         MediaPlayer.OnPreparedListener, MediaPlayer.OnErrorListener,
-        MediaPlayer.OnCompletionListener, PlayBackInterface{
+        MediaPlayer.OnCompletionListener, PlayerInterface {
 
+    private String SERVICE_LOG="MUSIC SERVICE";
     private MediaPlayer player;
     private ArrayList<SongModel> songs;
     private ArrayList<AlbumModel> albums;
-    private int songPosn;
+    private ArrayList<ArtistModel> artists;
     private SongModel currentSong;
+    private int currentSongPosition;
     Callback callback;
     private final IBinder musicBind = new MusicBinder();
+    boolean firstLaunch;
 
     @Nullable
     @Override
@@ -52,73 +53,54 @@ public class MusicService extends Service implements
     @Override
     public void onCreate() {
         super.onCreate();
-        songPosn = 0;
         player = new MediaPlayer();
         songs=new ArrayList<>();
         currentSong=SongModel.EMPTY();
-        initMusicPlayer();
-        Log.i("Services:","OnCreate()");
-        if(currentSong.getTitle() != null) {
-            Log.i("Start","Re-come here");
-            player.start();
-        }
+        currentSongPosition = 0;
+        initMusicService();
+        firstLaunch = true;
     }
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         String LOG_TAG="service_tag";
-       if (intent.getAction().equals("action.prev")) {
-            Log.i(LOG_TAG, "Clicked Previous");
-           playPrev();
-           showNotification();
+        if(intent.getAction().equals("")) {
+            createNotification();
+        } else if (intent.getAction().equals("action.prev")) {
+            playPrev();
+            createNotification();
             Toast.makeText(this, "Clicked Previous!", Toast.LENGTH_SHORT).show();
 
         } else if (intent.getAction().equals("action.play")) {
-            Log.i(LOG_TAG, "Clicked Play");
-           showNotification();
-           start();
-            Toast.makeText(this, "Clicked Play!", Toast.LENGTH_SHORT).show();
+            createNotification();
+            if(isPlaying()) {
+                pause();
+            }else {
+                start();
+            }
 
         } else if (intent.getAction().equals("action.next")){
-            Log.i(LOG_TAG, "Clicked Next");
-           playNext();
-           showNotification();
-            Toast.makeText(this, "Clicked Next!", Toast.LENGTH_SHORT).show();
-
+            playNext();
+            createNotification();
         } else if (intent.getAction().equals("action.stop")) {
-            Log.i(LOG_TAG, "Received Stop Foreground Intent");
-           stop();
+            stop();
             stopForeground(true);
             stopSelf();
         }
-        showNotification();
-           return START_STICKY;
+        return START_STICKY;
     }
 
-
-    public void initMusicPlayer(){
+    public void initMusicService(){
         player.setOnPreparedListener(this);
         player.setOnCompletionListener(this);
         player.setOnErrorListener(this);
         player.setWakeMode(getApplicationContext(),
                 PowerManager.PARTIAL_WAKE_LOCK);
         player.setAudioStreamType(AudioManager.STREAM_MUSIC);
+        // load all the medias
         loadMedia();
-        loadAlbum();
-        Log.i("Services: ","initMusicPlayer()");
     }
 
-    public void setList(ArrayList<SongModel> theSongs){
-        songs=theSongs;
-    }
-
-    public void playNext() {
-        play(songPosn+1);
-    }
-
-    public void playPrev() {
-        play(songPosn-1);
-    }
     @Override
     public void onCompletion(MediaPlayer mediaPlayer) {
         if(callback != null) {
@@ -131,20 +113,13 @@ public class MusicService extends Service implements
             return MusicService.this;
         }
     }
-//
-//    @Override
-//    public boolean onUnbind(Intent intent){
-//        player.stop();
-//        player.release();
-//        return false;
-//    }
 
-//    @Override
-//    public void onDestroy() {
-//        player.stop();
-//        player.release();
-//    }
-
+    @Override
+    public void onDestroy() {
+        player.stop();
+        player.release();
+        Log.i("Service","Called on destry");
+    }
 
     @Override
     public boolean onError(MediaPlayer mediaPlayer, int i, int i1) {
@@ -156,86 +131,22 @@ public class MusicService extends Service implements
         mediaPlayer.start();
     }
 
-    public void setSong(int songIndex){
-        songPosn=songIndex;
-    }
-
+    // Overriding the Player Interface methods
     @Override
-    public void loadMedia() {
-        songs= DataLoader.getSongs(this);
-    }
+    public void start() { player.start(); }
 
-    public void loadAlbum() {
-        albums = DataLoader.getAlbums(this);
-    }
-
-    @Override
-    public ArrayList<SongModel> getSongs() {
-        return this.songs;
-    }
-    public ArrayList<AlbumModel> getAlbums() { return this.albums; }
-
-    @Override
-    public void start() {
-        // Randomly play the song
-        if(currentSong.getTitle()==null) {
-            Random random = new Random();
-            int pos = random.nextInt(songs.size() - 1);
-            play(songs.get(pos));
-        }
-        player.start();
-    }
-
-    @Override
-    public void stop() {
-        player.stop();
-    }
-
-    @Override
-    public void setState(int state) {
-        //
-    }
-
-    public String getCurrentSongName(){
-        return currentSong.getTitle();
-    }
-
-    @Override
-    public int getState() {
-        return 0;
-    }
-
-    @Override
-    public boolean isPlaying() {
-        return player.isPlaying();
-    }
-
-    @Override
-    public int getCurrentStreamPosition() {
-        return player.getCurrentPosition();
-    }
-
-    @Override
-    public long getDuration() {
-        return player.getDuration();
-    }
-
-    @Override
-    public void setCurrentStreamPosition(int pos) {
-        //
-    }
-
-    @Override
+   @Override
     public void play(int pos){
-        songPosn=pos;
+        currentSongPosition=pos;
         player.reset();
         SongModel playSong = songs.get(pos);
         try{
             player.setDataSource(playSong.getData());
-            Log.i("Service","Playing From Service");
+            callback.onTrackChange(playSong);
+            Log.i(SERVICE_LOG,"Playing From Service");
         }
         catch(Exception e){
-            Log.e("MUSIC SERVICE", "Error setting data source", e);
+            Log.e(SERVICE_LOG, "Error setting data source", e);
         }
         player.prepareAsync();
     }
@@ -246,18 +157,38 @@ public class MusicService extends Service implements
         player.reset();
         try{
             player.setDataSource(song.getData());
+            callback.onTrackChange(song);
+            player.prepareAsync();
         }
         catch(Exception e){
-            Log.e("MUSIC SERVICE", "Error setting data source", e);
+            Log.e(SERVICE_LOG, "Error playing from data source", e);
         }
-        player.prepareAsync();
     }
-
 
     @Override
     public void pause() {
         player.pause();
+        callback.onPause();
     }
+
+     @Override
+    public void stop() { player.stop(); }
+
+    @Override
+    public void loadMedia() {
+        loadSong();
+        loadAlbum();
+        loadArtist();
+    }
+
+    @Override
+    public boolean isPlaying() { return player.isPlaying(); }
+
+    @Override
+    public int getCurrentStreamPosition() { return player.getCurrentPosition(); }
+
+    @Override
+    public long getDuration() { return player.getDuration(); }
 
     @Override
     public void seekTo(int position) {
@@ -265,51 +196,63 @@ public class MusicService extends Service implements
     }
 
     @Override
-    public void setCallback(Callback callback) {
-        this.callback=callback;
+    public void setCallback(Callback callback) { this.callback=callback; }
+
+    // Services Helper Methods
+    public void setSong(int songIndex){ currentSongPosition=songIndex; }
+    public String getCurrentSongName(){ return currentSong.getTitle(); }
+    public void loadSong() { songs = DataLoader.getSongs(this); }
+    public void loadAlbum() { albums = DataLoader.getAlbums(this); }
+    public void loadArtist() { artists = DataLoader.getArtists(this); }
+    public ArrayList<SongModel> getSongs() { return this.songs; }
+    public ArrayList<AlbumModel> getAlbums() { return this.albums; }
+    public ArrayList<ArtistModel> getArtists() { return this.artists; }
+    public void setList(ArrayList<SongModel> newSongs){ songs=newSongs; }
+    public void playNext() { play(currentSongPosition+1); }
+    public void playPrev() { play(currentSongPosition-1); }
+
+    // switch the current service to the foreground by creating the
+    // notifications
+    public void toForeground() {
+        startForeground(123,createNotification());
+    }
+    // kill the foreground notification, so that service
+    // can run in background
+    public void toBackground() {
+        stopForeground(true);
     }
 
-
-    public void showNotification() {
-        Intent notificationIntent = new Intent(this, MainActivity.class);
-        notificationIntent.setAction("action.main");
-        notificationIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK
-                | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-        PendingIntent pendingIntent = PendingIntent.getActivity(this, 0,
-                notificationIntent, 0);
+    public Notification createNotification() {
+        Intent openAppIntent = new Intent(this,SettingsActivity.class);
+        PendingIntent pendingOpenAppIntent = PendingIntent.getActivity(this,0,openAppIntent,0);
 
         Intent previousIntent = new Intent(this, MusicService.class);
         previousIntent.setAction("action.prev");
-        PendingIntent ppreviousIntent = PendingIntent.getService(this, 0,
-                previousIntent, 0);
+        PendingIntent ppreviousIntent = PendingIntent.getService(this, 0, previousIntent, 0);
 
         Intent playIntent = new Intent(this, MusicService.class);
         playIntent.setAction("action.play");
-        PendingIntent pplayIntent = PendingIntent.getService(this, 0,
-                playIntent, 0);
+        PendingIntent pplayIntent = PendingIntent.getService(this, 0, playIntent, 0);
 
         Intent nextIntent = new Intent(this, MusicService.class);
         nextIntent.setAction("action.next");
         PendingIntent pnextIntent = PendingIntent.getService(this, 0,
                 nextIntent, 0);
 
-//        Bitmap icon = BitmapFactory.decodeFile(currentSong.getAlbumArt());
         Notification notification = new NotificationCompat.Builder(this)
                 .setContentTitle(currentSong.getTitle())
                 .setTicker(currentSong.getTitle())
                 .setContentText(currentSong.getArtistName())
                 .setSmallIcon(R.drawable.music_icon)
-//                .setLargeIcon(Bitmap.createScaledBitmap(icon, 128, 128, false))
-                .setContentIntent(pendingIntent)
+                .setContentIntent(pendingOpenAppIntent)
                 .setOngoing(true)
                 .addAction(android.R.drawable.ic_media_previous, "Previous",
                         ppreviousIntent)
-                .addAction(android.R.drawable.ic_media_play, "Play",
+                .addAction(android.R.drawable.ic_media_play, "Toggle",
                         pplayIntent)
                 .addAction(android.R.drawable.ic_media_next, "Next",
                         pnextIntent).build();
-
-        startForeground(101, notification);
+        return notification;
 
     }
 }

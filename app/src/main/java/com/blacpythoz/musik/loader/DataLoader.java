@@ -10,7 +10,6 @@ import android.util.Log;
 import com.blacpythoz.musik.models.AlbumModel;
 import com.blacpythoz.musik.models.ArtistModel;
 import com.blacpythoz.musik.models.SongModel;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
@@ -35,8 +34,8 @@ public class DataLoader {
         do {
             int id = cursor.getInt(cursor.getColumnIndex(MediaStore.Audio.Media.TITLE_KEY));
             String title = cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.TITLE));
-            String artistName = cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.TITLE));
-            String composer = cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.TITLE));
+            String artistName = cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.ARTIST));
+            String composer = cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.COMPOSER));
             String albumName = cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.ALBUM));
             String data = cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.DATA));
             int trackNumber = cursor.getInt(cursor.getColumnIndex(MediaStore.Audio.Media.TRACK));
@@ -51,8 +50,8 @@ public class DataLoader {
             Uri albumArt = ContentUris.withAppendedId(albumArtUri, albumId);
 
             songs.add(new SongModel(id,title,artistName,composer,albumName,albumArt.toString(),
-                         data,trackNumber,year,duration,dateModified,dateAdded,albumId,artistId,
-                         bookmark));
+                    data,trackNumber,year,duration,dateModified,dateAdded,albumId,artistId,
+                    bookmark));
 
         } while (cursor.moveToNext());
         cursor.close();
@@ -92,8 +91,40 @@ public class DataLoader {
 //            }
 //        }
 //        Log.i("All Albums list: ",allAlbums.size()+"");
-
         return allAlbums;
+    }
+
+    public static ArrayList<ArtistModel> getArtists(Context context) {
+        ArrayList<AlbumModel> albums = getAlbums(context);
+         Map<Integer,ArrayList<AlbumModel>> artistMap=new HashMap<>();
+        ArrayList<ArtistModel> allArtists = new ArrayList<>();
+        for(AlbumModel album: albums) {
+            if (artistMap.get(album.getArtistId()) == null) {
+                artistMap.put(album.getArtistId(), new ArrayList<AlbumModel>());
+                artistMap.get(album.getArtistId()).add(album);
+            } else {
+                artistMap.get(album.getArtistId()).add(album);
+            }
+        }
+
+        // Extracting and mapping the songlist
+        for (Map.Entry<Integer, ArrayList<AlbumModel>> entry : artistMap.entrySet()) {
+            ArrayList<AlbumModel> artistSpecificAlbum = new ArrayList<>();
+            for(AlbumModel album: entry.getValue()) {
+                artistSpecificAlbum.add(album);
+            }
+            allArtists.add(new ArtistModel(artistSpecificAlbum));
+        }
+
+          //Debugging Code
+//        for(ArtistModel k:allArtists) {
+//            for(AlbumModel album: k.getAlbums()) {
+//                Log.i("Test "+album.getArtistId(),"Album Title: "+album.getName());
+//            }
+//        }
+//        Log.i("All Albums list: ",allArtists.size()+"");
+//
+        return allArtists;
     }
 
 }

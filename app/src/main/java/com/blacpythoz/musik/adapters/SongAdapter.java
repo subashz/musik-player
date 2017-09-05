@@ -130,13 +130,15 @@ public class SongAdapter extends RecyclerView.Adapter<SongAdapter.ViewHolder>{
         this.songBtnClickListener = songBtnClickListener;
     }
 
+    // Filters the list fi
     // Filters the list field
     public void filter(String filterKey) {
         filterKey = filterKey.toLowerCase();
         filteredSongs.clear();
         Log.i("Filter key is: ",filterKey);
         if (filterKey.length() == 0) {
-            filteredSongs.addAll(dbSongs);
+//            filteredSongs.addAll(dbSongs);
+            filteredSongs.clear();
         }
         else
         {
@@ -149,5 +151,4 @@ public class SongAdapter extends RecyclerView.Adapter<SongAdapter.ViewHolder>{
         }
         notifyDataSetChanged();
     }
-
 }

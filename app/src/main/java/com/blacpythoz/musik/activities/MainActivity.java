@@ -13,12 +13,10 @@ import android.support.design.widget.TabLayout;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
-
 import android.support.v4.view.ViewPager;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
-
 import com.blacpythoz.musik.R;
 import com.blacpythoz.musik.adapters.SectionsPageAdapter;
 import com.blacpythoz.musik.fragments.AlbumListFragment;
@@ -28,11 +26,13 @@ import com.blacpythoz.musik.fragments.SongListFragment;
 import com.blacpythoz.musik.services.MusicService;
 
 public class MainActivity extends AppCompatActivity {
-
     private SectionsPageAdapter sectionsPageAdapter;
     private ViewPager viewPager;
     private TabLayout tabLayout;
 
+    MusicService musicService;
+    Intent playIntent;
+    boolean boundService =false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -43,6 +43,32 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    // Service is also created in MainActivity so that
+    // it can create the notification before unbinding to the service
+    // When main activiy gets stopped, it create the notifcation if service is active,
+    // so that service can play the music
+    ServiceConnection serviceConnection = new ServiceConnection() {
+        @Override
+        public void onServiceConnected (ComponentName componentName, IBinder iBinder){
+            MusicService.MusicBinder binder = (MusicService.MusicBinder) iBinder;
+            musicService = binder.getService();
+            // dont show the notification
+            musicService.toBackground();
+            boundService = true;
+        }
+        @Override
+        public void onServiceDisconnected (ComponentName componentName){ }
+    };
+
+    // initialize all the things for services
+    @Override
+    protected void onStart() {
+        super.onStart();
+        playIntent = new Intent(this,MusicService.class);
+        playIntent.setAction("");
+        bindService(playIntent,serviceConnection,Context.BIND_AUTO_CREATE);
+        startService(playIntent);
+    }
 
     public void handleAllView() {
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
@@ -87,7 +113,6 @@ public class MainActivity extends AppCompatActivity {
             startActivity(search);
             return true;
         }
-
         return super.onOptionsItemSelected(item);
     }
 
@@ -117,6 +142,20 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-
-
+    // this is the main for switching the
+    // service to the background process
+    @Override
+    protected void onStop() {
+        super.onStop();
+        if(boundService) {
+            if(musicService.isPlaying()) {
+                musicService.toForeground();
+            } else {
+                stopService(playIntent);
+            }
+            unbindService(serviceConnection);
+            boundService = false;
+        }
+    }
 }
+

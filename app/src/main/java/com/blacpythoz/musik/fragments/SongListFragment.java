@@ -23,7 +23,7 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 import com.blacpythoz.musik.R;
 import com.blacpythoz.musik.activities.MainActivity;
-import com.blacpythoz.musik.interfaces.PlayBackInterface;
+import com.blacpythoz.musik.interfaces.PlayerInterface;
 import com.blacpythoz.musik.models.SongModel;
 import com.blacpythoz.musik.adapters.SongAdapter;
 import com.blacpythoz.musik.services.MusicService;
@@ -82,21 +82,23 @@ public class SongListFragment extends Fragment {
     public void onStart() {
         super.onStart();
         if(playIntent==null){
-            playIntent = new Intent((MainActivity)getActivity(), MusicService.class);
-            playIntent.setAction("action.next");
+            playIntent = new Intent(getActivity(), MusicService.class);
+            playIntent.setAction("");
 
-            ((MainActivity)getActivity()).bindService(playIntent, musicConnection, Context.BIND_AUTO_CREATE);
-            ((MainActivity)getActivity()).startService(playIntent);
+            getActivity().bindService(playIntent, musicConnection, Context.BIND_AUTO_CREATE);
+            getActivity().startService(playIntent);
         }
         Log.d("Fragment","onStart()");
     }
 
     @Override
     public void onDestroy() {
-        //((MainActivity)getActivity()).stopService(playIntent);
-        ((MainActivity)getActivity()).unbindService(musicConnection);
         super.onDestroy();
-        Log.d("Fragment","onDestroy()");
+         if(musicBound) {
+            getActivity().unbindService(musicConnection);
+            musicBound = false;
+        }
+        Log.d("Fragment","onStop()");
     }
 
     public void onCreate(Bundle savedInstanceState) {
@@ -137,12 +139,24 @@ public class SongListFragment extends Fragment {
         });
 
         // issue with the oncompletion should be solved fast..
-        musicSrv.setCallback(new PlayBackInterface.Callback() {
+        musicSrv.setCallback(new PlayerInterface.Callback() {
             @Override
             public void onCompletion(SongModel song) {
 //                Log.i("Completed","Songs using callback");
 //                currentSong.setText(song.getSongName());
 //                Picasso.with(getContext()).load(song.getAlbumArt()).into(ivActionSongCoverArt);
+            }
+
+            @Override
+            public void onTrackChange(SongModel song) {
+                currentSong.setText(song.getTitle());
+                Picasso.with(getContext()).load(song.getAlbumArt()).into(ivActionSongCoverArt);
+                actionBtn.setBackgroundResource(R.drawable.ic_media_pause);
+            }
+
+            @Override
+            public void onPause() {
+                actionBtn.setBackgroundResource(R.drawable.ic_media_play);
             }
         });
     }
@@ -201,9 +215,6 @@ public class SongListFragment extends Fragment {
     //make some changes while playing the songs
     public void playSong(SongModel song) {
         musicSrv.play(song);
-        progressBar.setMax((int)musicSrv.getDuration());
-        currentSong.setText(song.getTitle());
-        Picasso.with(getContext()).load(song.getAlbumArt()).into(ivActionSongCoverArt);
     }
 
     // progress bar thread on the bottom of the action bar

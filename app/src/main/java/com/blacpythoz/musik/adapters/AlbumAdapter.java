@@ -3,6 +3,7 @@ package com.blacpythoz.musik.adapters;
 import android.content.Context;
 import android.support.v7.widget.RecyclerView;
 import android.text.Layout;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -11,6 +12,7 @@ import android.widget.TextView;
 
 import com.blacpythoz.musik.R;
 import com.blacpythoz.musik.models.AlbumModel;
+import com.squareup.picasso.Callback;
 import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
@@ -35,11 +37,16 @@ public class AlbumAdapter extends RecyclerView.Adapter<AlbumAdapter.ViewHolder> 
     }
 
     @Override
-    public void onBindViewHolder(ViewHolder holder, int position) {
-        AlbumModel albumModel = albums.get(position);
+    public void onBindViewHolder(final ViewHolder holder, int position) {
+        final AlbumModel albumModel = albums.get(position);
         holder.albumName.setText(albumModel.getName());
         holder.albumNoOfSong.setText(albumModel.getNoOfSong()+ " songs");
-        Picasso.with(context).load(albumModel.getCoverArt()).into(holder.albumImage);
+        Picasso.with(context).load(albumModel.getCoverArt()).into(holder.albumImage,new Callback(){
+                @Override
+                public void onSuccess() { }
+                @Override
+                public void onError() { Picasso.with(context).load(R.drawable.album_default).into(holder.albumImage); }
+        });
     }
 
     @Override

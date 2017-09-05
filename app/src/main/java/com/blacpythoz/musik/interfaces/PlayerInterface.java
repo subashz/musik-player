@@ -7,39 +7,24 @@ import java.util.ArrayList;
  * Created by deadsec on 9/3/17.
  */
 
-public interface PlayBackInterface {
+public interface PlayerInterface {
 
     void start();
-
-    void stop();
-
-    void setState(int state);
-
-    int getState();
-
-    boolean isPlaying();
-
-    int getCurrentStreamPosition();
-
-    long getDuration();
-
-    void setCurrentStreamPosition(int pos);
-
     void play(int pos);
-
     void play(SongModel song);
-
     void pause();
-
+    void stop();
     void seekTo(int position);
+    void loadMedia();
+    boolean isPlaying();
+    long getDuration();
+    int getCurrentStreamPosition();
+    void setCallback(Callback callback);
 
     interface Callback {
         void onCompletion(SongModel song);
+        void onTrackChange(SongModel song);
+        void onPause();
     }
-
-    void setCallback(Callback callback);
-    void loadMedia();
-    ArrayList<SongModel> getSongs();
-
 }
 
