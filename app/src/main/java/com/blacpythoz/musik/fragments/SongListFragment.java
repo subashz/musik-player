@@ -1,6 +1,5 @@
 package com.blacpythoz.musik.fragments;
 
-import android.app.Activity;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -18,16 +17,12 @@ import android.widget.ImageButton;
 import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.ImageView;
-import android.widget.ProgressBar;
-import android.widget.TextView;
+
 import com.blacpythoz.musik.R;
-import com.blacpythoz.musik.activities.MainActivity;
-import com.blacpythoz.musik.interfaces.PlayerInterface;
 import com.blacpythoz.musik.models.SongModel;
 import com.blacpythoz.musik.adapters.SongAdapter;
 import com.blacpythoz.musik.services.MusicService;
-import com.squareup.picasso.Picasso;
+
 import java.util.ArrayList;
 
 public class SongListFragment extends Fragment {
@@ -35,12 +30,6 @@ public class SongListFragment extends Fragment {
     RecyclerView recyclerView;
     ArrayList<SongModel> songs;
     SongAdapter adapter;
-    ImageView actionBtn;
-    ProgressBar progressBar;
-    TextView currentSong;
-    ImageView ivActionSongCoverArt;
-    Thread t = new SongProgressBarThread();
-
 
     //testing services
     private MusicService musicSrv;
@@ -48,20 +37,12 @@ public class SongListFragment extends Fragment {
     ServiceConnection musicConnection;
     private boolean musicBound=false;
 
-    Activity mainActivity = (MainActivity)getActivity();
-
-
-
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View rootview = inflater.inflate(R.layout.fragment_song_list, container, false);
         songs=new ArrayList<>();
-        actionBtn=(ImageView)rootview.findViewById(R.id.iv_action_btn);
-        progressBar=(ProgressBar)rootview.findViewById(R.id.pb_song_duration);
         recyclerView=(RecyclerView)rootview.findViewById(R.id.rv_song_list);
-        currentSong=(TextView)rootview.findViewById(R.id.tv_current_song_name);
-        ivActionSongCoverArt=(ImageView)rootview.findViewById(R.id.iv_action_song_cover);
 
         adapter=new SongAdapter(songs,getContext());
         LinearLayoutManager linearLayoutManager = new LinearLayoutManager(getActivity());
@@ -74,7 +55,6 @@ public class SongListFragment extends Fragment {
         if(musicBound) {
             initPlayer();
         }
-
         return rootview;
     }
 
@@ -123,43 +103,6 @@ public class SongListFragment extends Fragment {
 
     }
 
-    public void handleActionListener() {
-        actionBtn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-
-                if(musicSrv.isPlaying()) {
-                    actionBtn.setBackgroundResource(R.drawable.ic_media_play);
-                    musicSrv.pause();
-                }else {
-                    musicSrv.start();
-                    actionBtn.setBackgroundResource(R.drawable.ic_media_pause);
-                }
-            }
-        });
-
-        // issue with the oncompletion should be solved fast..
-        musicSrv.setCallback(new PlayerInterface.Callback() {
-            @Override
-            public void onCompletion(SongModel song) {
-//                Log.i("Completed","Songs using callback");
-//                currentSong.setText(song.getSongName());
-//                Picasso.with(getContext()).load(song.getAlbumArt()).into(ivActionSongCoverArt);
-            }
-
-            @Override
-            public void onTrackChange(SongModel song) {
-                currentSong.setText(song.getTitle());
-                Picasso.with(getContext()).load(song.getAlbumArt()).into(ivActionSongCoverArt);
-                actionBtn.setBackgroundResource(R.drawable.ic_media_pause);
-            }
-
-            @Override
-            public void onPause() {
-                actionBtn.setBackgroundResource(R.drawable.ic_media_play);
-            }
-        });
-    }
 
     public void handleSongClick() {
 
@@ -205,34 +148,14 @@ public class SongListFragment extends Fragment {
     //initialize all the component
     public void initPlayer() {
         songs=musicSrv.getSongs();
+        Log.i("GOt songs",songs.get(0).getTitle());
         adapter=new SongAdapter(songs,getContext());
         recyclerView.setAdapter(adapter);
         handleSongClick();
-        handleActionListener();
-        t.start();
     }
 
     //make some changes while playing the songs
     public void playSong(SongModel song) {
         musicSrv.play(song);
     }
-
-    // progress bar thread on the bottom of the action bar
-    private class SongProgressBarThread extends Thread {
-        @Override
-        public void run() {
-            while (true) {
-                try {
-                    Thread.sleep(1000);
-                    if (musicSrv != null) {
-                        progressBar.setProgress(musicSrv.getCurrentStreamPosition());
-                    }
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-            }
-        }
-    }
-
-
 }

@@ -7,7 +7,6 @@
     android:layout_marginTop="2dp"
     android:clickable="true"
     app:cardUseCompatPadding="true"
-    android:foreground="?android:attr/selectableItemBackground"
 >
 
 <android.support.constraint.ConstraintLayout
@@ -35,6 +34,7 @@
         android:layout_width="0dp"
         android:id="@+id/cl_song_item"
         android:clickable="true"
+        android:background="?attr/selectableItemBackgroundBorderless"
         android:layout_height="wrap_content"
         app:layout_constraintRight_toLeftOf="@+id/bt_song_menu"
         app:layout_constraintLeft_toRightOf="@+id/iv_song_coverart"

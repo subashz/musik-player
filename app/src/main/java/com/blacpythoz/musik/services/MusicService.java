@@ -14,7 +14,6 @@ import android.util.Log;
 import android.widget.Toast;
 
 import com.blacpythoz.musik.R;
-import com.blacpythoz.musik.activities.MainActivity;
 import com.blacpythoz.musik.activities.SettingsActivity;
 import com.blacpythoz.musik.interfaces.PlayerInterface;
 import com.blacpythoz.musik.loader.DataLoader;
@@ -23,7 +22,6 @@ import com.blacpythoz.musik.models.ArtistModel;
 import com.blacpythoz.musik.models.SongModel;
 
 import java.util.ArrayList;
-import java.util.Random;
 
 /**
  * Created by deadsec on 9/3/17.
@@ -201,6 +199,7 @@ public class MusicService extends Service implements
     // Services Helper Methods
     public void setSong(int songIndex){ currentSongPosition=songIndex; }
     public String getCurrentSongName(){ return currentSong.getTitle(); }
+    public SongModel getCurrentSong() { return currentSong; }
     public void loadSong() { songs = DataLoader.getSongs(this); }
     public void loadAlbum() { albums = DataLoader.getAlbums(this); }
     public void loadArtist() { artists = DataLoader.getArtists(this); }
