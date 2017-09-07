@@ -33,5 +33,7 @@ dependencies {
     compile 'com.android.support:design:26.+'
     compile 'com.android.support:support-v4:26.+'
     compile 'com.android.support:support-vector-drawable:26.+'
+    compile 'com.sothree.slidinguppanel:library:3.3.1'
+
     testCompile 'junit:junit:4.12'
 }

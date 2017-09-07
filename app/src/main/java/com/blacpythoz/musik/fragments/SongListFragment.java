@@ -158,4 +158,5 @@ public class SongListFragment extends Fragment {
     public void playSong(SongModel song) {
         musicSrv.play(song);
     }
+
 }

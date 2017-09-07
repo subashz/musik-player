@@ -54,6 +54,7 @@ public class MainActivity extends Activity {
     }
     public void initPlayer() {
         Intent mainIntent = new Intent(getApplicationContext(),PlayerActivity.class);
+        super.onDestroy();
         startActivity(mainIntent);
     }
 }

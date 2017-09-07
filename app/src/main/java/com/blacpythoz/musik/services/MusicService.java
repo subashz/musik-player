@@ -3,17 +3,23 @@ import android.app.Notification;
 import android.app.PendingIntent;
 import android.app.Service;
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
+import android.net.Uri;
 import android.os.Binder;
+import android.os.Build;
 import android.os.IBinder;
 import android.os.PowerManager;
+import android.provider.MediaStore;
 import android.support.annotation.Nullable;
 import android.support.v4.app.NotificationCompat;
 import android.util.Log;
 import android.widget.Toast;
 
 import com.blacpythoz.musik.R;
+import com.blacpythoz.musik.activities.MainActivity;
 import com.blacpythoz.musik.activities.SettingsActivity;
 import com.blacpythoz.musik.interfaces.PlayerInterface;
 import com.blacpythoz.musik.loader.DataLoader;
@@ -21,6 +27,7 @@ import com.blacpythoz.musik.models.AlbumModel;
 import com.blacpythoz.musik.models.ArtistModel;
 import com.blacpythoz.musik.models.SongModel;
 
+import java.io.IOException;
 import java.util.ArrayList;
 
 /**
@@ -138,8 +145,14 @@ public class MusicService extends Service implements
         currentSongPosition=pos;
         player.reset();
         SongModel playSong = songs.get(pos);
+
+       if(nbuilder != null) {
+           updateNotificationOnPlay(playSong);
+       }
+
         try{
             player.setDataSource(playSong.getData());
+            Log.i("bookmark",playSong.getBookmark()+"");
             callback.onTrackChange(playSong);
             Log.i(SERVICE_LOG,"Playing From Service");
         }
@@ -155,6 +168,7 @@ public class MusicService extends Service implements
         player.reset();
         try{
             player.setDataSource(song.getData());
+            Log.i("bookmark",song.getBookmark()+"");
             callback.onTrackChange(song);
             player.prepareAsync();
         }
@@ -221,8 +235,9 @@ public class MusicService extends Service implements
         stopForeground(true);
     }
 
+    Notification.Builder nbuilder = null;
     public Notification createNotification() {
-        Intent openAppIntent = new Intent(this,SettingsActivity.class);
+        Intent openAppIntent = new Intent(this,MainActivity.class);
         PendingIntent pendingOpenAppIntent = PendingIntent.getActivity(this,0,openAppIntent,0);
 
         Intent previousIntent = new Intent(this, MusicService.class);
@@ -235,23 +250,46 @@ public class MusicService extends Service implements
 
         Intent nextIntent = new Intent(this, MusicService.class);
         nextIntent.setAction("action.next");
-        PendingIntent pnextIntent = PendingIntent.getService(this, 0,
-                nextIntent, 0);
+        PendingIntent pnextIntent = PendingIntent.getService(this, 0, nextIntent, 0);
 
-        Notification notification = new NotificationCompat.Builder(this)
-                .setContentTitle(currentSong.getTitle())
-                .setTicker(currentSong.getTitle())
-                .setContentText(currentSong.getArtistName())
-                .setSmallIcon(R.drawable.music_icon)
-                .setContentIntent(pendingOpenAppIntent)
-                .setOngoing(true)
-                .addAction(android.R.drawable.ic_media_previous, "Previous",
-                        ppreviousIntent)
-                .addAction(android.R.drawable.ic_media_play, "Toggle",
-                        pplayIntent)
-                .addAction(android.R.drawable.ic_media_next, "Next",
-                        pnextIntent).build();
-        return notification;
+        Bitmap bitmap = getBitmap(currentSong.getAlbumArt());
+        nbuilder = new Notification.Builder(this)
+                    .setContentTitle(currentSong.getTitle())
+                    .setTicker(currentSong.getTitle())
+                    .setContentText(currentSong.getArtistName())
+                    .setSmallIcon(R.drawable.music_icon)
+                    .setContentIntent(pendingOpenAppIntent)
+                    .setOngoing(true)
+                    .setLargeIcon(bitmap)
+                    .addAction(android.R.drawable.ic_media_previous, "Previous", ppreviousIntent)
+                    .addAction(android.R.drawable.ic_media_play, "Toggle", pplayIntent)
+                    .addAction(android.R.drawable.ic_media_next, "Next", pnextIntent)
+                    .setLargeIcon(bitmap);
 
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            nbuilder.setStyle(new Notification.MediaStyle());
+        }
+        return nbuilder.build();
+    }
+
+    // this method handles the updating of the notification
+    // here is code redundant which must be clean up
+    public void updateNotificationOnPlay(SongModel song) {
+         Bitmap bitmap = getBitmap(song.getAlbumArt());
+        nbuilder.setLargeIcon(bitmap)
+        .setContentTitle(song.getTitle())
+        .setTicker(song.getTitle())
+        .setContentText(song.getArtistName());
+        startForeground(123,nbuilder.build());
+    }
+
+    public Bitmap getBitmap(String uri) {
+        Bitmap bitmap=null;
+          try {
+            bitmap = MediaStore.Images.Media.getBitmap(this.getContentResolver(), Uri.parse(uri));
+        }catch (Exception e) {
+            bitmap = BitmapFactory.decodeResource(this.getResources(),R.drawable.album_default);
+        }
+        return bitmap;
     }
 }

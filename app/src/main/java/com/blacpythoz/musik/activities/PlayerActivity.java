@@ -28,6 +28,7 @@ import com.blacpythoz.musik.fragments.SongListFragment;
 import com.blacpythoz.musik.interfaces.PlayerInterface;
 import com.blacpythoz.musik.models.SongModel;
 import com.blacpythoz.musik.services.MusicService;
+import com.sothree.slidinguppanel.SlidingUpPanelLayout;
 import com.squareup.picasso.Picasso;
 
 public class PlayerActivity extends AppCompatActivity {
@@ -35,10 +36,16 @@ public class PlayerActivity extends AppCompatActivity {
     private ViewPager viewPager;
     private TabLayout tabLayout;
 
+
     ImageView actionBtn;
     ProgressBar progressBar;
     TextView currentSong;
     ImageView ivActionSongCoverArt;
+
+    ImageView panelPlayBtn;
+    ImageView panelNextBtn;
+    ImageView panelPrevBtn;
+    SlidingUpPanelLayout slidingUpPanelLayout;
 
     MusicService musicService;
     Intent playIntent;
@@ -95,8 +102,16 @@ public class PlayerActivity extends AppCompatActivity {
         ivActionSongCoverArt=(ImageView)findViewById(R.id.iv_action_song_cover);
         actionBtn=(ImageView)findViewById(R.id.iv_action_btn);
         progressBar=(ProgressBar)findViewById(R.id.pb_song_duration);
+
+        panelPlayBtn = (ImageView) findViewById(R.id.iv_pn_play_btn);
+        panelNextBtn = (ImageView) findViewById(R.id.iv_pn_next_btn);
+        panelPrevBtn = (ImageView) findViewById(R.id.iv_pn_prev_btn);
+        slidingUpPanelLayout = (SlidingUpPanelLayout)findViewById(R.id.sliding_layout);
+
     }
 
+    // all the listeners and action handlers are
+    // done in this methods
     public void handleAllAction()  {
 
         actionBtn.setOnClickListener(new View.OnClickListener() {
@@ -111,6 +126,44 @@ public class PlayerActivity extends AppCompatActivity {
                 }
             }
         });
+
+        panelNextBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                musicService.playNext();
+            }
+        });
+
+        panelPrevBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                musicService.playPrev();
+            }
+        });
+
+        panelPlayBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                 if(musicService.isPlaying()) {
+                    panelPlayBtn.setBackgroundResource(R.drawable.ic_action_pause);
+                    musicService.pause();
+                }else {
+                    musicService.start();
+                    panelPlayBtn.setBackgroundResource(R.drawable.ic_action_play);
+                }
+            }
+        });
+        slidingUpPanelLayout.addPanelSlideListener(new SlidingUpPanelLayout.PanelSlideListener() {
+            @Override
+            public void onPanelSlide(View panel, float slideOffset) {
+                //actionBtn.setVisibility(View.INVIISIBLE);
+                actionBtn.animate().alpha(1-slideOffset);
+            }
+
+            @Override
+            public void onPanelStateChanged(View panel, SlidingUpPanelLayout.PanelState previousState, SlidingUpPanelLayout.PanelState newState) { }
+        });
+
 
         // issue with the oncompletion should be solved fast..
         musicService.setCallback(new PlayerInterface.Callback() {
