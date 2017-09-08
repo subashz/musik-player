@@ -36,7 +36,6 @@ public class PlayerActivity extends AppCompatActivity {
     private ViewPager viewPager;
     private TabLayout tabLayout;
 
-
     ImageView actionBtn;
     ProgressBar progressBar;
     TextView currentSong;
@@ -114,6 +113,7 @@ public class PlayerActivity extends AppCompatActivity {
     // done in this methods
     public void handleAllAction()  {
 
+        // for the action button
         actionBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -127,6 +127,18 @@ public class PlayerActivity extends AppCompatActivity {
             }
         });
 
+        viewPager.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if(slidingUpPanelLayout.getPanelState() == SlidingUpPanelLayout.PanelState.EXPANDED) {
+                    slidingUpPanelLayout.setPanelState(SlidingUpPanelLayout.PanelState.COLLAPSED);
+                }
+            }
+        });
+
+
+
+        // for the sliding panel buttons
         panelNextBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -153,6 +165,8 @@ public class PlayerActivity extends AppCompatActivity {
                 }
             }
         });
+
+        // sliding panel listeners
         slidingUpPanelLayout.addPanelSlideListener(new SlidingUpPanelLayout.PanelSlideListener() {
             @Override
             public void onPanelSlide(View panel, float slideOffset) {
@@ -163,6 +177,8 @@ public class PlayerActivity extends AppCompatActivity {
             @Override
             public void onPanelStateChanged(View panel, SlidingUpPanelLayout.PanelState previousState, SlidingUpPanelLayout.PanelState newState) { }
         });
+
+
 
 
         // issue with the oncompletion should be solved fast..

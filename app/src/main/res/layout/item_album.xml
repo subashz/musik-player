@@ -10,6 +10,7 @@
     android:layout_margin="5dp"
     android:foreground="?android:attr/selectableItemBackground"
     android:clickable="true"
+    android:id="@+id/cv_item_album"
 
     app:cardCornerRadius="2dp"
     app:cardUseCompatPadding="true">

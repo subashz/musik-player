@@ -8,9 +8,11 @@ import android.os.Bundle;
 import android.os.IBinder;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.support.v7.widget.CardView;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -33,8 +35,9 @@ public class AlbumListFragment extends Fragment {
     boolean serviceBound=false;
     ArrayList<AlbumModel> albums;
     RecyclerView recyclerView;
-    RecyclerView.Adapter adapter;
+    AlbumAdapter adapter;
     ServiceConnection serviceConnection;
+    CardView albumCardView;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -60,6 +63,7 @@ public class AlbumListFragment extends Fragment {
        albums = musicService.getAlbums();
        adapter = new AlbumAdapter(albums,getContext());
        recyclerView.setAdapter(adapter);
+       handleAllListener();
    }
 
     @Override
@@ -81,9 +85,19 @@ public class AlbumListFragment extends Fragment {
         recyclerView.setHasFixedSize(true);
         GridLayoutManager gridLayoutManager = new GridLayoutManager(getContext(),2);
         recyclerView.setLayoutManager(gridLayoutManager);
+        albumCardView = (CardView)rootView.findViewById(R.id.cv_item_album);
         recyclerView.setAdapter(adapter);
         if(serviceBound) { initPlayer(); }
         return rootView;
+    }
+
+    public void handleAllListener() {
+        adapter.setAlbumClickListener(new AlbumAdapter.AlbumClickListener() {
+            @Override
+            public void OnAlbumClickListener(View v, AlbumModel album, int pos) {
+                Log.i("Album clicked is: ",album.getArtistName());
+            }
+        });
     }
 
     @Override
