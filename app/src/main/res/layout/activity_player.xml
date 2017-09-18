@@ -1,162 +1,54 @@
 <?xml version="1.0" encoding="utf-8"?>
-<com.sothree.slidinguppanel.SlidingUpPanelLayout xmlns:android="http://schemas.android.com/apk/res/android"
+
+<android.support.design.widget.CoordinatorLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:sothree="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/main_content"
     xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/sliding_layout"
+    tools:context="com.blacpythoz.musik.activities.PlayerActivity"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:gravity="bottom"
-    app:umanoClipPanel="true"
-    sothree:umanoDragView="@+id/dragView"
-    sothree:umanoOverlay="true"
-    sothree:umanoParallaxOffset="100dp"
-    sothree:umanoScrollableView="@+id/list"
-    sothree:umanoShadowHeight="4dp">
+    android:fitsSystemWindows="true">
 
-    <android.support.design.widget.CoordinatorLayout
-        android:id="@+id/main_content"
+    <android.support.design.widget.AppBarLayout
+        android:id="@+id/appbar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="0dp"
+        android:layout_marginRight="0dp"
+        android:layout_marginTop="0dp"
+        android:paddingTop="@dimen/appbar_padding_top"
+        android:theme="@style/AppTheme.AppBarOverlay">
+
+        <android.support.v7.widget.Toolbar
+            android:id="@+id/toolbar"
+            android:layout_width="match_parent"
+            android:layout_height="?attr/actionBarSize"
+            android:background="?attr/colorPrimary"
+            app:layout_scrollFlags="scroll|enterAlways"
+            app:popupTheme="@style/AppTheme.PopupOverlay"
+            app:title="Musik Player">
+
+        </android.support.v7.widget.Toolbar>
+
+        <android.support.design.widget.TabLayout
+            android:id="@+id/tabs"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+
+    </android.support.design.widget.AppBarLayout>
+
+    <android.support.v4.view.ViewPager
+        android:id="@+id/container"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_marginBottom="0dp"
         android:layout_marginLeft="0dp"
         android:layout_marginRight="0dp"
-        android:fitsSystemWindows="true"
-        app:layout_constraintBottom_toTopOf="@+id/constraintLayout"
-        app:layout_constraintHorizontal_bias="0.0"
-        app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        tools:context="com.blacpythoz.musik.activities.PlayerActivity">
+        android:layout_marginTop="0dp"
+        android:paddingBottom="70dp"
+        app:layout_behavior="@string/appbar_scrolling_view_behavior" />
 
-        <android.support.design.widget.AppBarLayout
-            android:id="@+id/appbar"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginLeft="0dp"
-            android:layout_marginRight="0dp"
-            android:layout_marginTop="0dp"
-            android:paddingTop="@dimen/appbar_padding_top"
-            android:theme="@style/AppTheme.AppBarOverlay">
+    <include layout="@layout/panel_player_interface"/>
 
-            <android.support.v7.widget.Toolbar
-                android:id="@+id/toolbar"
-                android:layout_width="match_parent"
-                android:layout_height="?attr/actionBarSize"
-                android:background="?attr/colorPrimary"
-                app:layout_scrollFlags="scroll|enterAlways"
-                app:popupTheme="@style/AppTheme.PopupOverlay"
-                app:title="Musik Player">
-
-            </android.support.v7.widget.Toolbar>
-
-            <android.support.design.widget.TabLayout
-                android:id="@+id/tabs"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content" />
-
-        </android.support.design.widget.AppBarLayout>
-
-        <android.support.v4.view.ViewPager
-            android:id="@+id/container"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:layout_marginBottom="0dp"
-            android:layout_marginLeft="0dp"
-            android:layout_marginRight="0dp"
-            android:layout_marginTop="0dp"
-            app:layout_behavior="@string/appbar_scrolling_view_behavior" />
-
-    </android.support.design.widget.CoordinatorLayout>
-
-    <!-- SLIDING LAYOUT -->
-    <LinearLayout
-        android:id="@+id/dragView"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:background="#ffffff"
-        android:clickable="true"
-        android:focusable="false"
-        android:orientation="vertical">
-
-        <android.support.constraint.ConstraintLayout
-            android:id="@+id/constraintLayout"
-            android:layout_width="match_parent"
-            android:layout_height="70dp"
-            android:background="#000000"
-            android:clickable="true"
-            android:elevation="0dp"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintHorizontal_bias="0.0"
-            app:layout_constraintLeft_toLeftOf="parent"
-            app:layout_constraintRight_toRightOf="parent">
-
-
-            <ProgressBar
-                android:id="@+id/pb_song_duration"
-                style="?android:attr/progressBarStyleHorizontal"
-                android:layout_width="0dp"
-                android:layout_height="16dp"
-                android:layout_marginTop="8dp"
-                android:backgroundTint="@color/colorAccent"
-                android:foregroundTint="@color/colorAccent"
-                android:progress="10"
-                android:progressTint="@color/colorAccent"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintHorizontal_bias="0.0"
-                app:layout_constraintLeft_toLeftOf="parent"
-                app:layout_constraintRight_toRightOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/tv_current_song_name" />
-
-            <ImageView
-                android:id="@+id/iv_action_btn"
-                android:layout_width="28dp"
-                android:layout_height="28dp"
-                android:layout_marginEnd="10dp"
-                android:layout_marginTop="10dp"
-                android:background="@android:drawable/ic_media_play"
-                app:layout_constraintRight_toRightOf="parent"
-                app:layout_constraintTop_toTopOf="parent" />
-
-            <ImageView
-                android:id="@+id/iv_action_song_cover"
-                android:layout_width="35dp"
-                android:layout_height="35dp"
-                android:layout_marginBottom="6dp"
-                android:layout_marginStart="8dp"
-                android:layout_marginTop="6dp"
-                android:background="@drawable/music_icon"
-                android:scaleType="fitXY"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintLeft_toLeftOf="parent"
-                app:layout_constraintTop_toTopOf="parent" />
-
-            <TextView
-                android:id="@+id/tv_current_song_name"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="8dp"
-                android:layout_marginEnd="8dp"
-                android:layout_marginStart="16dp"
-                android:layout_marginTop="8dp"
-                android:ellipsize="end"
-                android:lines="1"
-                android:text="TextView"
-                android:textColor="#ffffff"
-                app:layout_constraintBottom_toBottomOf="@+id/iv_action_song_cover"
-                app:layout_constraintHorizontal_bias="0.0"
-                app:layout_constraintLeft_toRightOf="@+id/iv_action_song_cover"
-                app:layout_constraintRight_toLeftOf="@+id/iv_action_btn"
-                app:layout_constraintTop_toTopOf="@+id/iv_action_song_cover" />
-
-        </android.support.constraint.ConstraintLayout>
-
-        <include
-            layout="@layout/panel_player_interface"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            tools:mockup_opacity="0.3" />
-
-    </LinearLayout>
-
-</com.sothree.slidinguppanel.SlidingUpPanelLayout>
+</android.support.design.widget.CoordinatorLayout>

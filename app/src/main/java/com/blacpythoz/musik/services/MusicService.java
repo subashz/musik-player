@@ -64,6 +64,7 @@ public class MusicService extends Service implements
         currentSongPosition = 0;
         initMusicService();
         firstLaunch = true;
+
     }
 
     @Override
@@ -171,6 +172,7 @@ public class MusicService extends Service implements
             Log.i("bookmark",song.getBookmark()+"");
             callback.onTrackChange(song);
             player.prepareAsync();
+            Log.i("proces","SOnged");
         }
         catch(Exception e){
             Log.e(SERVICE_LOG, "Error playing from data source", e);

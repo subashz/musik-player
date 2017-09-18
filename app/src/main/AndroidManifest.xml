@@ -3,7 +3,8 @@
     package="com.blacpythoz.musik">
 
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
-    <uses-permission android:name="android.permission.WAKE_LOCK"/>
+    <uses-permission android:name="android.permission.WAKE_LOCK" />
+
     <application
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
@@ -11,29 +12,28 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".activities.MainActivity"
-            android:theme="@android:style/Theme.Holo.NoActionBar.Fullscreen" >
+        <activity
+            android:name=".activities.MainActivity"
+            android:theme="@android:style/Theme.Holo.NoActionBar.Fullscreen">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
+
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-
         <activity
             android:name=".activities.PlayerActivity"
             android:label="@string/title_activity_main"
-            android:theme="@style/AppTheme.NoActionBar">
-        </activity>
+            android:theme="@style/AppTheme.NoActionBar"></activity>
         <activity
             android:name=".activities.SettingsActivity"
-            android:label="@string/title_activity_settings"
             android:configChanges="orientation"
+            android:label="@string/title_activity_settings"
             android:parentActivityName=".activities.PlayerActivity">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="com.blacpythoz.musik.activities.PlayerActivity" />
         </activity>
-
         <activity
             android:name=".activities.SearchActivity"
             android:label="@string/title_activity_search"
@@ -42,7 +42,9 @@
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="com.blacpythoz.musik.activities.PlayerActivity" />
         </activity>
-        <service android:name=".services.MusicService"></service>
+
+        <service android:name=".services.MusicService" />
+
     </application>
 
 </manifest>

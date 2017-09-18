@@ -6,17 +6,21 @@ import android.content.Intent;
 import android.content.ServiceConnection;
 import android.content.res.Configuration;
 import android.os.IBinder;
+import android.support.annotation.NonNull;
+import android.support.constraint.ConstraintLayout;
+import android.support.design.widget.BottomSheetBehavior;
 import android.support.design.widget.TabLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.support.v4.view.ViewPager;
 import android.os.Bundle;
 import android.util.Log;
+import android.util.TypedValue;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageView;
-import android.widget.ProgressBar;
+import android.widget.SeekBar;
 import android.widget.TextView;
 
 import com.blacpythoz.musik.R;
@@ -28,7 +32,7 @@ import com.blacpythoz.musik.fragments.SongListFragment;
 import com.blacpythoz.musik.interfaces.PlayerInterface;
 import com.blacpythoz.musik.models.SongModel;
 import com.blacpythoz.musik.services.MusicService;
-import com.sothree.slidinguppanel.SlidingUpPanelLayout;
+import com.blacpythoz.musik.utils.Helper;
 import com.squareup.picasso.Picasso;
 
 public class PlayerActivity extends AppCompatActivity {
@@ -37,19 +41,22 @@ public class PlayerActivity extends AppCompatActivity {
     private TabLayout tabLayout;
 
     ImageView actionBtn;
-    ProgressBar progressBar;
+    SeekBar seekBar;
     TextView currentSong;
-    ImageView ivActionSongCoverArt;
+    TextView currentArtist;
+    ImageView currentCoverArt;
 
     ImageView panelPlayBtn;
     ImageView panelNextBtn;
     ImageView panelPrevBtn;
-    SlidingUpPanelLayout slidingUpPanelLayout;
+
+    BottomSheetBehavior bottomSheetBehavior;
+    ConstraintLayout.LayoutParams params ;
 
     MusicService musicService;
     Intent playIntent;
     boolean boundService =false;
-    Thread progressBarThread= new SongProgressBarThread();
+    ///Thread seekBarThread= new SongSeekBarThread();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -85,7 +92,7 @@ public class PlayerActivity extends AppCompatActivity {
         playIntent.setAction("");
         bindService(playIntent,serviceConnection,Context.BIND_AUTO_CREATE);
         startService(playIntent);
-        progressBarThread.start();
+      //  seekBarThread.start();
     }
 
     public void handleAllView() {
@@ -96,17 +103,24 @@ public class PlayerActivity extends AppCompatActivity {
         setupViewPager(viewPager);
         tabLayout=(TabLayout)findViewById(R.id.tabs);
         tabLayout.setupWithViewPager(viewPager);
+        View bottomView = findViewById(R.id.cl_player_interface);
+        bottomSheetBehavior=BottomSheetBehavior.from(bottomView);
 
-        currentSong=(TextView)findViewById(R.id.tv_current_song_name);
-        ivActionSongCoverArt=(ImageView)findViewById(R.id.iv_action_song_cover);
-        actionBtn=(ImageView)findViewById(R.id.iv_action_btn);
-        progressBar=(ProgressBar)findViewById(R.id.pb_song_duration);
+        // dp to pixel
+        int heightInPixel = Helper.dpToPx(this,70);
+        bottomSheetBehavior.setPeekHeight(heightInPixel);
+
+        currentSong=(TextView)findViewById(R.id.tv_panel_song_name);
+        currentArtist=(TextView)findViewById(R.id.tv_panel_artist_name);
+        currentCoverArt=(ImageView)findViewById(R.id.iv_pn_cover_art);
+        actionBtn=(ImageView)findViewById(R.id.iv_pn_action_btn);
+        seekBar=(SeekBar) findViewById(R.id.sb_pn_player);
 
         panelPlayBtn = (ImageView) findViewById(R.id.iv_pn_play_btn);
         panelNextBtn = (ImageView) findViewById(R.id.iv_pn_next_btn);
         panelPrevBtn = (ImageView) findViewById(R.id.iv_pn_prev_btn);
-        slidingUpPanelLayout = (SlidingUpPanelLayout)findViewById(R.id.sliding_layout);
 
+        params = (ConstraintLayout.LayoutParams)currentSong.getLayoutParams();
     }
 
     // all the listeners and action handlers are
@@ -126,17 +140,6 @@ public class PlayerActivity extends AppCompatActivity {
                 }
             }
         });
-
-        viewPager.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                if(slidingUpPanelLayout.getPanelState() == SlidingUpPanelLayout.PanelState.EXPANDED) {
-                    slidingUpPanelLayout.setPanelState(SlidingUpPanelLayout.PanelState.COLLAPSED);
-                }
-            }
-        });
-
-
 
         // for the sliding panel buttons
         panelNextBtn.setOnClickListener(new View.OnClickListener() {
@@ -166,36 +169,40 @@ public class PlayerActivity extends AppCompatActivity {
             }
         });
 
-        // sliding panel listeners
-        slidingUpPanelLayout.addPanelSlideListener(new SlidingUpPanelLayout.PanelSlideListener() {
+        bottomSheetBehavior.setBottomSheetCallback(new BottomSheetBehavior.BottomSheetCallback() {
             @Override
-            public void onPanelSlide(View panel, float slideOffset) {
-                //actionBtn.setVisibility(View.INVIISIBLE);
-                actionBtn.animate().alpha(1-slideOffset);
+            public void onStateChanged(@NonNull View bottomSheet, int newState) {
+                if(newState == BottomSheetBehavior.STATE_EXPANDED) {
+                    panelPlayBtn.animate().rotation(360).setDuration(1000);
+                }
             }
 
             @Override
-            public void onPanelStateChanged(View panel, SlidingUpPanelLayout.PanelState previousState, SlidingUpPanelLayout.PanelState newState) { }
+            public void onSlide(@NonNull View bottomSheet, float slideOffset) {
+                // animating the views when panel expanding and collapsing
+                params.topMargin=Helper.dpToPx(getApplicationContext(),slideOffset*30+4);
+                actionBtn.setAlpha(1-slideOffset);
+                currentCoverArt.setAlpha(slideOffset);
+                panelNextBtn.setAlpha(slideOffset);
+                panelPlayBtn.setAlpha(slideOffset);
+                panelPrevBtn.setAlpha(slideOffset);
+                currentSong.setLayoutParams(params);
+            }
         });
-
-
-
 
         // issue with the oncompletion should be solved fast..
         musicService.setCallback(new PlayerInterface.Callback() {
             @Override
-            public void onCompletion(SongModel song) {
-//                currentSong.setText(song.getSongName());
-//                Log.i("Completed","Songs using callback");
-//                Picasso.with(getContext()).load(song.getAlbumArt()).into(ivActionSongCoverArt);
-            }
+            public void onCompletion(SongModel song) { }
+
             @Override
             public void onTrackChange(SongModel song) {
                 currentSong.setText(song.getTitle());
-                Picasso.with(getApplicationContext()).load(song.getAlbumArt()).into(ivActionSongCoverArt);
-                actionBtn.setBackgroundResource(R.drawable.ic_media_pause);
-                progressBar.setMax((int)song.getDuration());
-                Log.i("PlayerActivity","OnTrackChange called");
+                currentArtist.setText(song.getArtistName());
+                // this is commentend because it freeze the main ui
+                //Picasso.with(getApplicationContext()).load(song.getAlbumArt()).into(currentCoverArt);
+                //actionBtn.setBackgroundResource(R.drawable.ic_media_pause);
+                //seekBar.setMax((int) song.getDuration());
             }
 
             @Override
@@ -258,14 +265,14 @@ public class PlayerActivity extends AppCompatActivity {
     }
 
         // progress bar thread on the bottom of the action bar
-    private class SongProgressBarThread extends Thread {
+    private class SongSeekBarThread extends Thread {
         @Override
         public void run() {
             while (true) {
                 try {
                     Thread.sleep(1000);
                     if (musicService != null) {
-                        progressBar.setProgress(musicService.getCurrentStreamPosition());
+                        seekBar.setProgress(musicService.getCurrentStreamPosition());
                     }
                 } catch (Exception e) {
                     e.printStackTrace();
@@ -280,14 +287,13 @@ public class PlayerActivity extends AppCompatActivity {
     @Override
     public void onConfigurationChanged(Configuration newConfig) {
         super.onConfigurationChanged(newConfig);
-        Log.i("Configuration","Changes");
-        if(musicService.isPlaying()) {
-            SongModel song = musicService.getCurrentSong();
-            currentSong.setText(song.getTitle());
-            Picasso.with(getApplicationContext()).load(song.getAlbumArt()).into(ivActionSongCoverArt);
-            actionBtn.setBackgroundResource(R.drawable.ic_media_pause);
-            //progressBar.setMax((int)song.getDuration());
-        }
+//        if(musicService.isPlaying()) {
+//            SongModel song = musicService.getCurrentSong();
+//            currentSong.setText(song.getTitle());
+//            Picasso.with(getApplicationContext()).load(song.getAlbumArt()).into(ivActionSongCoverArt);
+//            actionBtn.setBackgroundResource(R.drawable.ic_media_pause);
+//            //progressBar.setMax((int)song.getDuration());
+//        }
     }
 }
 

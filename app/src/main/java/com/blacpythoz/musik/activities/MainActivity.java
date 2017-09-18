@@ -6,13 +6,9 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.PersistableBundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
-import android.support.v7.app.AppCompatActivity;
-import android.util.Log;
-import android.widget.Toast;
 
 /**
  * Created by deadsec on 9/5/17.
@@ -53,8 +49,8 @@ public class MainActivity extends Activity {
         }
     }
     public void initPlayer() {
-        Intent mainIntent = new Intent(getApplicationContext(),PlayerActivity.class);
         super.onDestroy();
+        Intent mainIntent = new Intent(getApplicationContext(),PlayerActivity.class);
         startActivity(mainIntent);
     }
 }
