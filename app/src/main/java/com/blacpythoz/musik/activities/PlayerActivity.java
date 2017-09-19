@@ -5,7 +5,10 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.content.res.Configuration;
+import android.graphics.Bitmap;
+import android.net.Uri;
 import android.os.IBinder;
+import android.provider.MediaStore;
 import android.support.annotation.NonNull;
 import android.support.constraint.ConstraintLayout;
 import android.support.design.widget.BottomSheetBehavior;
@@ -35,6 +38,10 @@ import com.blacpythoz.musik.services.MusicService;
 import com.blacpythoz.musik.utils.Helper;
 import com.squareup.picasso.Picasso;
 
+import java.io.IOException;
+
+import jp.wasabeef.blurry.Blurry;
+
 public class PlayerActivity extends AppCompatActivity {
     private SectionsPageAdapter sectionsPageAdapter;
     private ViewPager viewPager;
@@ -52,6 +59,8 @@ public class PlayerActivity extends AppCompatActivity {
 
     BottomSheetBehavior bottomSheetBehavior;
     ConstraintLayout.LayoutParams params ;
+    ConstraintLayout panelLayout;
+    ImageView panelBackground;
 
     MusicService musicService;
     Intent playIntent;
@@ -110,6 +119,8 @@ public class PlayerActivity extends AppCompatActivity {
         int heightInPixel = Helper.dpToPx(this,70);
         bottomSheetBehavior.setPeekHeight(heightInPixel);
 
+        panelLayout = (ConstraintLayout)findViewById(R.id.cl_player_interface);
+        panelBackground = (ImageView)findViewById(R.id.iv_panel_background);
         currentSong=(TextView)findViewById(R.id.tv_panel_song_name);
         currentArtist=(TextView)findViewById(R.id.tv_panel_artist_name);
         currentCoverArt=(ImageView)findViewById(R.id.iv_pn_cover_art);
@@ -161,6 +172,7 @@ public class PlayerActivity extends AppCompatActivity {
             public void onClick(View view) {
                  if(musicService.isPlaying()) {
                     panelPlayBtn.setBackgroundResource(R.drawable.ic_action_pause);
+
                     musicService.pause();
                 }else {
                     musicService.start();
@@ -174,6 +186,17 @@ public class PlayerActivity extends AppCompatActivity {
             public void onStateChanged(@NonNull View bottomSheet, int newState) {
                 if(newState == BottomSheetBehavior.STATE_EXPANDED) {
                     panelPlayBtn.animate().rotation(360).setDuration(1000);
+                    Uri imageUri = Uri.parse(musicService.getCurrentSong().getAlbumArt());
+                    try {
+                        Bitmap bitmap = MediaStore.Images.Media.getBitmap(getApplicationContext().getContentResolver(), imageUri);
+                        Blurry.with(getApplicationContext()).from(bitmap).into(panelBackground);
+                        currentCoverArt.setImageBitmap(bitmap);
+
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+
+
                 }
             }
 
@@ -187,6 +210,7 @@ public class PlayerActivity extends AppCompatActivity {
                 panelPlayBtn.setAlpha(slideOffset);
                 panelPrevBtn.setAlpha(slideOffset);
                 currentSong.setLayoutParams(params);
+                panelBackground.setAlpha(slideOffset);
             }
         });
 
