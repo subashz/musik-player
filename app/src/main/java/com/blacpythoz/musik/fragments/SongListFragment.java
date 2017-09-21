@@ -1,12 +1,6 @@
 package com.blacpythoz.musik.fragments;
 
-import android.content.ComponentName;
-import android.content.Context;
-import android.content.Intent;
-import android.content.ServiceConnection;
-import android.os.IBinder;
 import android.support.annotation.Nullable;
-import android.support.v4.app.Fragment;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.PopupMenu;
@@ -25,84 +19,33 @@ import com.blacpythoz.musik.services.MusicService;
 
 import java.util.ArrayList;
 
-public class SongListFragment extends Fragment {
+public class SongListFragment extends MusicServiceFragment {
+
+    public static final String TAG="SongListFragment";
 
     RecyclerView recyclerView;
     ArrayList<SongModel> songs;
     SongAdapter adapter;
-
-    //testing services
     private MusicService musicSrv;
-    private Intent playIntent;
-    ServiceConnection musicConnection;
-    private boolean musicBound=false;
 
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View rootview = inflater.inflate(R.layout.fragment_song_list, container, false);
         songs=new ArrayList<>();
-        recyclerView=(RecyclerView)rootview.findViewById(R.id.rv_song_list);
-
+        recyclerView=rootview.findViewById(R.id.rv_song_list);
         adapter=new SongAdapter(songs,getContext());
         LinearLayoutManager linearLayoutManager = new LinearLayoutManager(getActivity());
         recyclerView.setLayoutManager(linearLayoutManager);
         recyclerView.setAdapter(adapter);
-
-        Log.d("Fragment","onCreateView");
-
-        // if the service is already connected then initialize the players.
-        if(musicBound) {
-            initPlayer();
-        }
         return rootview;
     }
 
     @Override
-    public void onStart() {
-        super.onStart();
-        if(playIntent==null){
-            playIntent = new Intent(getActivity(), MusicService.class);
-            playIntent.setAction("");
-
-            getActivity().bindService(playIntent, musicConnection, Context.BIND_AUTO_CREATE);
-            getActivity().startService(playIntent);
-        }
-        Log.d("Fragment","onStart()");
+    public void onServiceConnected(MusicService musicService) {
+        musicSrv = musicService;
+        initPlayer();
     }
-
-    @Override
-    public void onDestroy() {
-        super.onDestroy();
-         if(musicBound) {
-            getActivity().unbindService(musicConnection);
-            musicBound = false;
-        }
-        Log.d("Fragment","onStop()");
-    }
-
-    public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        musicConnection= new ServiceConnection() {
-            @Override
-            public void onServiceConnected(ComponentName name, IBinder service) {
-                MusicService.MusicBinder binder = (MusicService.MusicBinder) service;
-                musicSrv = binder.getService();
-                initPlayer();
-                Log.i("Fragment","Connected to service");
-                musicBound = true;
-            }
-
-            @Override
-            public void onServiceDisconnected(ComponentName name) {
-                musicBound = false;
-                Log.i("Fragment","ServiceDisconnected");
-            }
-        };
-        Log.d("Fragment","onCreate()");
-
-    }
-
 
     public void handleSongClick() {
 
@@ -110,7 +53,7 @@ public class SongListFragment extends Fragment {
         adapter.setOnSongItemClickListener(new SongAdapter.SongItemClickListener() {
             @Override
             public void onSongItemClick(View v, SongModel song, final int pos) {
-                Log.i("Song Clicked is: ",song.getTitle());
+                Log.i(TAG,song.getTitle());
                 playSong(song);
             }
         });
@@ -120,7 +63,7 @@ public class SongListFragment extends Fragment {
 
             @Override
             public void onSongItemLongClickListener(View v, SongModel song, int pos) {
-                Log.i("Long","CLICKED");
+                Log.i(TAG,"onsongitemclick listener testing");
             }
         });
 
@@ -148,7 +91,7 @@ public class SongListFragment extends Fragment {
     //initialize all the component
     public void initPlayer() {
         songs=musicSrv.getSongs();
-        Log.i("GOt songs",songs.get(0).getTitle());
+        Log.i(TAG,songs.get(0).getTitle());
         adapter=new SongAdapter(songs,getContext());
         recyclerView.setAdapter(adapter);
         handleSongClick();

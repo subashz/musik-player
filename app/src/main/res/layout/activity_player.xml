@@ -49,6 +49,6 @@
         android:paddingBottom="70dp"
         app:layout_behavior="@string/appbar_scrolling_view_behavior" />
 
-    <include layout="@layout/panel_player_interface"/>
+    <!--<include layout="@layout/panel_player_interface"/>-->
 
 </android.support.design.widget.CoordinatorLayout>

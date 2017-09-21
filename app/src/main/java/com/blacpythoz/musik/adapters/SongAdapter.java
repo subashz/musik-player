@@ -98,11 +98,11 @@ public class SongAdapter extends RecyclerView.Adapter<SongAdapter.ViewHolder>{
         ImageView ivSongCoverArt;
         public ViewHolder(View itemView) {
             super(itemView);
-            tvSongName = (TextView)itemView.findViewById(R.id.tv_song_name);
-            tvArtistName=(TextView)itemView.findViewById(R.id.tv_artist_name);
-            songMenuBtn=(ImageButton) itemView.findViewById(R.id.bt_song_menu);
-            constraintLayout=(ConstraintLayout)itemView.findViewById(R.id.cl_song_item);
-            ivSongCoverArt=(ImageView)itemView.findViewById(R.id.iv_song_coverart);
+            tvSongName = itemView.findViewById(R.id.tv_song_name);
+            tvArtistName=itemView.findViewById(R.id.tv_artist_name);
+            songMenuBtn=itemView.findViewById(R.id.bt_song_menu);
+            constraintLayout=itemView.findViewById(R.id.cl_song_item);
+            ivSongCoverArt=itemView.findViewById(R.id.iv_song_coverart);
         }
     }
 

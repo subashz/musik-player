@@ -14,20 +14,17 @@ import android.os.IBinder;
 import android.os.PowerManager;
 import android.provider.MediaStore;
 import android.support.annotation.Nullable;
-import android.support.v4.app.NotificationCompat;
 import android.util.Log;
 import android.widget.Toast;
 
 import com.blacpythoz.musik.R;
 import com.blacpythoz.musik.activities.MainActivity;
-import com.blacpythoz.musik.activities.SettingsActivity;
 import com.blacpythoz.musik.interfaces.PlayerInterface;
 import com.blacpythoz.musik.loader.DataLoader;
 import com.blacpythoz.musik.models.AlbumModel;
 import com.blacpythoz.musik.models.ArtistModel;
 import com.blacpythoz.musik.models.SongModel;
 
-import java.io.IOException;
 import java.util.ArrayList;
 
 /**
@@ -38,7 +35,7 @@ public class MusicService extends Service implements
         MediaPlayer.OnPreparedListener, MediaPlayer.OnErrorListener,
         MediaPlayer.OnCompletionListener, PlayerInterface {
 
-    private String SERVICE_LOG="MUSIC SERVICE";
+    private String LOG="MUSIC SERVICE";
     private MediaPlayer player;
     private ArrayList<SongModel> songs;
     private ArrayList<AlbumModel> albums;
@@ -64,7 +61,6 @@ public class MusicService extends Service implements
         currentSongPosition = 0;
         initMusicService();
         firstLaunch = true;
-
     }
 
     @Override
@@ -154,13 +150,13 @@ public class MusicService extends Service implements
         try{
             player.setDataSource(playSong.getData());
             Log.i("bookmark",playSong.getBookmark()+"");
+            player.prepareAsync();
             callback.onTrackChange(playSong);
-            Log.i(SERVICE_LOG,"Playing From Service");
+            Log.i(LOG,"Playing From Service");
         }
         catch(Exception e){
-            Log.e(SERVICE_LOG, "Error setting data source", e);
+            Log.e(LOG, "Error setting data source", e);
         }
-        player.prepareAsync();
     }
 
     @Override
@@ -170,12 +166,12 @@ public class MusicService extends Service implements
         try{
             player.setDataSource(song.getData());
             Log.i("bookmark",song.getBookmark()+"");
-            callback.onTrackChange(song);
             player.prepareAsync();
             Log.i("proces","SOnged");
+            this.callback.onTrackChange(song);
         }
         catch(Exception e){
-            Log.e(SERVICE_LOG, "Error playing from data source", e);
+            Log.e(LOG, "Error playing from data source", e);
         }
     }
 
@@ -211,6 +207,7 @@ public class MusicService extends Service implements
 
     @Override
     public void setCallback(Callback callback) { this.callback=callback; }
+
 
     // Services Helper Methods
     public void setSong(int songIndex){ currentSongPosition=songIndex; }

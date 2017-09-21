@@ -10,7 +10,6 @@ import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.GridLayoutManager;
-import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -28,7 +27,7 @@ import java.util.ArrayList;
  * Created by deadsec on 9/3/17.
  */
 
-public class AlbumListFragment extends Fragment {
+public class AlbumListFragment extends Fragment  {
 
     MusicService musicService;
     Intent playIntent;
@@ -79,13 +78,13 @@ public class AlbumListFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.fragment_album_list,container,false);
-        recyclerView = (RecyclerView)rootView.findViewById(R.id.rv_album_list);
+        recyclerView = rootView.findViewById(R.id.rv_album_list);
         albums = new ArrayList<>();
         adapter = new AlbumAdapter(albums,getContext());
         recyclerView.setHasFixedSize(true);
         GridLayoutManager gridLayoutManager = new GridLayoutManager(getContext(),2);
         recyclerView.setLayoutManager(gridLayoutManager);
-        albumCardView = (CardView)rootView.findViewById(R.id.cv_item_album);
+        albumCardView = rootView.findViewById(R.id.cv_item_album);
         recyclerView.setAdapter(adapter);
         if(serviceBound) { initPlayer(); }
         return rootView;

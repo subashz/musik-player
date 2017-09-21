@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.res.Resources;
 import android.util.TypedValue;
 
+
 /**
  * Created by deadsec on 9/18/17.
  */
@@ -13,4 +14,5 @@ public class Helper {
         Resources resources = context.getResources();
         return (int)TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP,dp,resources.getDisplayMetrics());
     }
+
 }
