@@ -24,6 +24,7 @@ import com.blacpythoz.musik.models.SongModel;
 import com.blacpythoz.musik.services.MusicService;
 
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Created by deadsec on 9/3/17.
@@ -33,7 +34,7 @@ public class SearchActivity  extends AppCompatActivity{
 
     RecyclerView recyclerView;
     SongAdapter adapter;
-    ArrayList<SongModel> songs;
+    List<SongModel> songs;
     MusicService musicService;
     boolean boundStatus=false;
     Intent serviceIntent;

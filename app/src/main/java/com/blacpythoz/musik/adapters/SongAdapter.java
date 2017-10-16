@@ -16,19 +16,20 @@ import com.blacpythoz.musik.models.SongModel;
 import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
+import java.util.List;
 
 public class SongAdapter extends RecyclerView.Adapter<SongAdapter.ViewHolder>{
 
-    ArrayList<SongModel> songs;             // for storing the current playing songs
-    ArrayList<SongModel> filteredSongs;     // for storing the filtered songs
-    ArrayList<SongModel> dbSongs;           // for storing the stock database songs
+    List<SongModel> songs;             // for storing the current playing songs
+    List<SongModel> filteredSongs;     // for storing the filtered songs
+    List<SongModel> dbSongs;           // for storing the stock database songs
 
     Context context;
     SongItemClickListener songItemClickListener;
     SongItemLongClickListener songItemLongClickListener;
     SongBtnClickListener songBtnClickListener;              // to show the menu when clicked to icon button
 
-    public SongAdapter(ArrayList<SongModel> songs, Context context) {
+    public SongAdapter(List<SongModel> songs, Context context) {
         this.songs = songs;
         this.dbSongs=songs;
         this.filteredSongs=new ArrayList<>();
@@ -135,7 +136,7 @@ public class SongAdapter extends RecyclerView.Adapter<SongAdapter.ViewHolder>{
     public void filter(String filterKey) {
         filterKey = filterKey.toLowerCase();
         filteredSongs.clear();
-        Log.i("Filter key is: ",filterKey);
+        Log.d("Filter key is: ",filterKey);
         if (filterKey.length() == 0) {
 //            filteredSongs.addAll(dbSongs);
             filteredSongs.clear();

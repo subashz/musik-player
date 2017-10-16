@@ -14,16 +14,17 @@ import com.blacpythoz.musik.models.ArtistModel;
 import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Created by deadsec on 9/4/17.
  */
 
 public class ArtistAdapter extends RecyclerView.Adapter<ArtistAdapter.ViewHolder>{
-    ArrayList<ArtistModel> artists;
+    List<ArtistModel> artists;
     Context context;
 
-    public ArtistAdapter(ArrayList<ArtistModel> artists, Context context) {
+    public ArtistAdapter(List<ArtistModel> artists, Context context) {
         this.artists = artists;
         this.context = context;
     }

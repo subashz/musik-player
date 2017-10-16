@@ -3,12 +3,16 @@ package com.blacpythoz.musik.activities;
 import android.content.Intent;
 import android.content.res.Configuration;
 import android.support.design.widget.TabLayout;
+import android.support.v4.app.Fragment;
 import android.support.v7.widget.Toolbar;
 import android.support.v4.view.ViewPager;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+
 import com.blacpythoz.musik.R;
+import com.blacpythoz.musik.adapters.AlbumAdapter;
 import com.blacpythoz.musik.adapters.SectionsPageAdapter;
 import com.blacpythoz.musik.fragments.AlbumListFragment;
 import com.blacpythoz.musik.fragments.ArtistListFragment;
@@ -18,19 +22,18 @@ import com.blacpythoz.musik.fragments.SongPlayerFragment;
 
 
 public class PlayerActivity extends MusicServiceActivity {
-    public static final String TAG=PlayerActivity.class.getSimpleName();
+    public static final String TAG = PlayerActivity.class.getSimpleName();
     private ViewPager viewPager;
     private TabLayout tabLayout;
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_player);
     }
 
     @Override
     public void onServiceConnected() {
-        super.onServiceConnected();
         handleAllView();
     }
 
@@ -41,18 +44,39 @@ public class PlayerActivity extends MusicServiceActivity {
         setupViewPager(viewPager);
         tabLayout = (TabLayout) findViewById(R.id.tabs);
         tabLayout.setupWithViewPager(viewPager);
-        getSupportFragmentManager().beginTransaction().add(R.id.main_content,new SongPlayerFragment(),"SongPlayer").commit();
+
+        Fragment songPlayerFragment = getSupportFragmentManager().findFragmentById(R.id.main_content);
+        if (songPlayerFragment == null) {
+            getSupportFragmentManager().beginTransaction().add(R.id.main_content, new SongPlayerFragment(), "SongPlayer").commit();
+            Log.d(TAG, "songPlayerFragment Fragment new created");
+        } else {
+            Log.d(TAG, "songPlayerFragment Fragment reused ");
+        }
+
     }
 
 
     private void setupViewPager(ViewPager viewPager) {
         SectionsPageAdapter adapter = new SectionsPageAdapter(getSupportFragmentManager());
-        adapter.addFragment(new SongListFragment(), "All Songs");
-        adapter.addFragment(new AlbumListFragment(), "Albums");
-        adapter.addFragment(new ArtistListFragment(), "Artist");
-        adapter.addFragment(new PlayListFragment(), "PlayList");
+        SongListFragment songListFragment;
+        AlbumListFragment albumListFragment;
+        PlayListFragment playListFragment;
+        ArtistListFragment artistListFragment;
+        songListFragment = new SongListFragment();
+        albumListFragment = new AlbumListFragment();
+        artistListFragment = new ArtistListFragment();
+        playListFragment = new PlayListFragment();
+        adapter.addFragment(songListFragment, "All Songs");
+        adapter.addFragment(albumListFragment, "Albums");
+        adapter.addFragment(artistListFragment, "Artist");
+        adapter.addFragment(playListFragment, "PlayList");
         viewPager.setAdapter(adapter);
     }
+
+    public Fragment findWithId(int id) {
+        return getSupportFragmentManager().findFragmentById(id);
+    }
+
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {

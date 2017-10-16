@@ -14,6 +14,7 @@ import com.blacpythoz.musik.models.ArtistModel;
 import com.blacpythoz.musik.services.MusicService;
 
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Created by deadsec on 9/3/17.
@@ -21,10 +22,12 @@ import java.util.ArrayList;
 
 public class ArtistListFragment extends MusicServiceFragment {
 
-    MusicService musicService;
-    RecyclerView recyclerView;
-    ArtistAdapter artistAdapter;
-    ArrayList<ArtistModel> artists;
+    private MusicService musicService;
+    private boolean musicServiceStatus = false;
+    private RecyclerView recyclerView;
+    private ArtistAdapter artistAdapter;
+    private List<ArtistModel> artists;
+
 
     @Nullable
     @Override
@@ -35,16 +38,18 @@ public class ArtistListFragment extends MusicServiceFragment {
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
         recyclerView.setHasFixedSize(true);
         artistAdapter = new ArtistAdapter(artists,getContext());
+        if(musicServiceStatus) {initFragment(); }
         return view;
     }
 
     @Override
     public void onServiceConnected(MusicService musicService) {
         this.musicService = musicService;
-        initPlayer();
+        musicServiceStatus=true;
+        initFragment();
     }
 
-    public void initPlayer() {
+    public void initFragment() {
             artists = musicService.getArtists();
             artistAdapter = new ArtistAdapter(artists, getContext());
             recyclerView.setAdapter(artistAdapter);

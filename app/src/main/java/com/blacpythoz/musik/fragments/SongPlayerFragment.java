@@ -2,6 +2,7 @@ package com.blacpythoz.musik.fragments;
 
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Color;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
@@ -10,9 +11,12 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.constraint.ConstraintLayout;
 import android.support.design.widget.BottomSheetBehavior;
+import android.support.design.widget.CoordinatorLayout;
 import android.support.v4.app.Fragment;
+import android.support.v4.view.ViewCompat;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
@@ -29,7 +33,6 @@ import com.blacpythoz.musik.utils.Helper;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 
-import jp.wasabeef.blurry.Blurry;
 
 /**
  * Created by deadsec on 9/20/17.
@@ -48,13 +51,18 @@ public class SongPlayerFragment extends MusicServiceFragment {
     private ImageView panelPlayBtn;
     private ImageView panelNextBtn;
     private ImageView panelPrevBtn;
-    private ImageView panelBackground;
 
     private BottomSheetBehavior bottomSheetBehavior;
     private ConstraintLayout panelLayout;
     private ConstraintLayout.LayoutParams params;
 
     private MusicService musicService;
+    private boolean musicServiceStatus = false;
+
+    @Override
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+    }
 
     @Nullable
     @Override
@@ -68,7 +76,6 @@ public class SongPlayerFragment extends MusicServiceFragment {
         int heightInPixel = Helper.dpToPx(getActivity(), 70);
         bottomSheetBehavior.setPeekHeight(heightInPixel);
 
-        panelBackground =  view.findViewById(R.id.iv_panel_background);
         currentSong =  view.findViewById(R.id.tv_panel_song_name);
         currentArtist =  view.findViewById(R.id.tv_panel_artist_name);
         currentCoverArt =  view.findViewById(R.id.iv_pn_cover_art);
@@ -81,18 +88,24 @@ public class SongPlayerFragment extends MusicServiceFragment {
 
         params = (ConstraintLayout.LayoutParams) currentSong.getLayoutParams();
 
+        if(musicServiceStatus) { updateUI(); handleAllAction(); }
+
         return view;
     }
 
     @Override
     public void onServiceConnected(MusicService musicService) {
         this.musicService = musicService;
+        musicServiceStatus=true;
+        updateUI();
         handleAllAction();
     }
 
     // done in this methods
     public void handleAllAction() {
 
+        //set default
+        actionBtn.setBackgroundResource(R.drawable.ic_media_play);
         //for the action button
         actionBtn.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -185,7 +198,6 @@ public class SongPlayerFragment extends MusicServiceFragment {
                 panelPlayBtn.setAlpha(slideOffset);
                 panelPrevBtn.setAlpha(slideOffset);
                 currentSong.setLayoutParams(params);
-                panelBackground.setAlpha(slideOffset);
             }
         });
 
@@ -229,12 +241,12 @@ public class SongPlayerFragment extends MusicServiceFragment {
 
     // this updates the ui on music changes in new runnable
     public void updateUiOnTrackChange(final SongModel song) {
-        new Handler().postDelayed(new Runnable() {
+        new Handler().post(new Runnable() {
             @Override
             public void run() {
+                currentSong.setText(song.getTitle());
                 actionBtn.setBackgroundResource(R.drawable.ic_media_pause);
                 panelPlayBtn.setBackgroundResource(R.drawable.ic_action_pause);
-                currentSong.setText(song.getTitle());
                 currentArtist.setText(song.getArtistName());
                 Uri imageUri = Uri.parse(song.getAlbumArt());
                 Bitmap bitmap = null;
@@ -245,9 +257,28 @@ public class SongPlayerFragment extends MusicServiceFragment {
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
-                Blurry.with(getActivity()).from(bitmap).into(panelBackground);
                 currentCoverArt.setImageBitmap(bitmap);
             }
-        }, 200);
+        });
     }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        bottomSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        updateUI();
+    }
+
+    public void updateUI() {
+        if(musicService!=null) {
+            SongModel song = musicService.getCurrentSong();
+            updateUiOnTrackChange(song);
+        }
+    }
+
 }

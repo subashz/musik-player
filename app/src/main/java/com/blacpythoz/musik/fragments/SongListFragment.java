@@ -18,15 +18,17 @@ import com.blacpythoz.musik.adapters.SongAdapter;
 import com.blacpythoz.musik.services.MusicService;
 
 import java.util.ArrayList;
+import java.util.List;
 
 public class SongListFragment extends MusicServiceFragment {
 
     public static final String TAG="SongListFragment";
 
     RecyclerView recyclerView;
-    ArrayList<SongModel> songs;
+    List<SongModel> songs;
     SongAdapter adapter;
     private MusicService musicSrv;
+    boolean musicServiceStatus = false;
 
     @Nullable
     @Override
@@ -38,13 +40,15 @@ public class SongListFragment extends MusicServiceFragment {
         LinearLayoutManager linearLayoutManager = new LinearLayoutManager(getActivity());
         recyclerView.setLayoutManager(linearLayoutManager);
         recyclerView.setAdapter(adapter);
+        if(musicServiceStatus) { initFragment(); }
         return rootview;
     }
 
     @Override
     public void onServiceConnected(MusicService musicService) {
         musicSrv = musicService;
-        initPlayer();
+        musicServiceStatus=true;
+        initFragment();
     }
 
     public void handleSongClick() {
@@ -53,7 +57,7 @@ public class SongListFragment extends MusicServiceFragment {
         adapter.setOnSongItemClickListener(new SongAdapter.SongItemClickListener() {
             @Override
             public void onSongItemClick(View v, SongModel song, final int pos) {
-                Log.i(TAG,song.getTitle());
+                Log.d(TAG,song.getTitle());
                 playSong(song);
             }
         });
@@ -63,7 +67,7 @@ public class SongListFragment extends MusicServiceFragment {
 
             @Override
             public void onSongItemLongClickListener(View v, SongModel song, int pos) {
-                Log.i(TAG,"onsongitemclick listener testing");
+                Log.d(TAG,"onsongitemclick listener testing");
             }
         });
 
@@ -89,9 +93,9 @@ public class SongListFragment extends MusicServiceFragment {
     }
 
     //initialize all the component
-    public void initPlayer() {
+    public void initFragment() {
         songs=musicSrv.getSongs();
-        Log.i(TAG,songs.get(0).getTitle());
+        Log.d(TAG,songs.get(0).getTitle());
         adapter=new SongAdapter(songs,getContext());
         recyclerView.setAdapter(adapter);
         handleSongClick();

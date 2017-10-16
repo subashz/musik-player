@@ -9,48 +9,53 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
+import android.support.v7.app.AppCompatActivity;
 
 /**
  * Created by deadsec on 9/5/17.
  */
 
-public class MainActivity extends Activity {
+public class PermitActivity extends AppCompatActivity {
+    public static int REQUEST_PERMISSION=123;
+    public boolean hasPermission=false;
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        if(checkPermission()) {
-            initPlayer();
-        }
-    }
-
-    public boolean checkPermission() {
-        if(Build.VERSION.SDK_INT >= 23) {
-            if(ActivityCompat.checkSelfPermission(getApplicationContext(), Manifest.permission.READ_EXTERNAL_STORAGE)!= PackageManager.PERMISSION_GRANTED) {
-                requestPermissions(new String[]{Manifest.permission.READ_EXTERNAL_STORAGE},123);
-                return false;
-            } else {
-                return true;
-            }
-        } else {
-            return true;
-        }
+        checkPermission();
     }
 
     @Override
-    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
-        if(requestCode==123) {
-            if(grantResults[0]== PackageManager.PERMISSION_GRANTED) {
-                initPlayer();
+    protected void onPostCreate(@Nullable Bundle savedInstanceState) {
+        super.onPostCreate(savedInstanceState);
+        if(!hasPermission) {
+           this.finish();
+        }
+    }
+
+    public void checkPermission() {
+        if(Build.VERSION.SDK_INT >= 23) {
+            if(ActivityCompat.checkSelfPermission(getApplicationContext(), Manifest.permission.READ_EXTERNAL_STORAGE)!= PackageManager.PERMISSION_GRANTED) {
+                requestPermissions(new String[]{Manifest.permission.READ_EXTERNAL_STORAGE},REQUEST_PERMISSION);
+                hasPermission=false;
             } else {
-                this.finish();
+                hasPermission=true;
+            }
+        } else {
+            hasPermission=true;
+        }
+    }
+
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        if(requestCode==REQUEST_PERMISSION) {
+            if(grantResults[0]== PackageManager.PERMISSION_GRANTED) {
+                hasPermission=true;
+            } else {
+               finish();
             }
         }else {
             super.onRequestPermissionsResult(requestCode, permissions, grantResults);
         }
-    }
-    public void initPlayer() {
-        super.onDestroy();
-        Intent mainIntent = new Intent(getApplicationContext(),PlayerActivity.class);
-        startActivity(mainIntent);
     }
 }

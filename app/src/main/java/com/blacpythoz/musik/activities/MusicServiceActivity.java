@@ -7,7 +7,7 @@ import android.content.ServiceConnection;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.support.annotation.Nullable;
-import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 
 import com.blacpythoz.musik.services.MusicService;
 
@@ -15,24 +15,24 @@ import com.blacpythoz.musik.services.MusicService;
  * Created by deadsec on 9/20/17.
  */
 
-public abstract class MusicServiceActivity extends AppCompatActivity {
+public abstract class MusicServiceActivity extends PermitActivity {
     public static final String TAG = MusicServiceActivity.class.getSimpleName();
     ServiceConnection serviceConnection;
     public static MusicService musicService;
-    boolean boundService=false;
+    boolean boundService = false;
     Intent playIntent;
 
     @Override
-    protected void onCreate(@Nullable Bundle savedInstanceState) {
+    public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         serviceConnection = new ServiceConnection() {
             @Override
             public void onServiceConnected(ComponentName componentName, IBinder iBinder) {
-                MusicService.MusicBinder binder = (MusicService.MusicBinder)iBinder;
+                MusicService.MusicBinder binder = (MusicService.MusicBinder) iBinder;
                 musicService = binder.getService();
                 MusicServiceActivity.this.onServiceConnected();
                 binder.getService().toBackground();
-                boundService=true;
+                boundService = true;
             }
 
             @Override
@@ -45,8 +45,7 @@ public abstract class MusicServiceActivity extends AppCompatActivity {
     // this acts like a callback.
     // mug. yo function gets called after service connected
     // so it must be override
-    public void onServiceConnected() {
-    }
+    abstract public void onServiceConnected();
 
     @Override
     protected void onStart() {
@@ -60,6 +59,11 @@ public abstract class MusicServiceActivity extends AppCompatActivity {
     @Override
     protected void onStop() {
         super.onStop();
+        Log.i(TAG, "onStopCalled()");
+        runServiceIfSongIsPlaying();
+    }
+
+    void runServiceIfSongIsPlaying() {
         if (boundService) {
             if (musicService.isPlaying()) {
                 musicService.toForeground();
@@ -69,5 +73,11 @@ public abstract class MusicServiceActivity extends AppCompatActivity {
             unbindService(serviceConnection);
             boundService = false;
         }
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        Log.i(TAG, "onDestroyCalled");
     }
 }

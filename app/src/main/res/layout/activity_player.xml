@@ -27,7 +27,7 @@
             android:background="?attr/colorPrimary"
             app:layout_scrollFlags="scroll|enterAlways"
             app:popupTheme="@style/AppTheme.PopupOverlay"
-            app:title="Musik Player">
+            app:title="@string/player_interface_title">
 
         </android.support.v7.widget.Toolbar>
 

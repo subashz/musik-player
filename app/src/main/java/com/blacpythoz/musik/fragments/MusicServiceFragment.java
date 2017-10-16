@@ -12,13 +12,15 @@ import com.blacpythoz.musik.services.MusicService;
 
 /**
  * Created by deadsec on 9/20/17.
+ * This class makes a service fragments, so that other fragments
+ * can extend this, and gets the music service.
+ * The onconnected is callback function ho. .
  */
 
 public abstract class MusicServiceFragment extends Fragment {
     public static final String TAG = "MusicServiceFragment";
     ServiceConnection serviceConnection;
     public MusicService musicService;
-    boolean boundService=false;
     Intent playIntent;
 
     @Override
@@ -30,8 +32,6 @@ public abstract class MusicServiceFragment extends Fragment {
                 MusicService.MusicBinder binder = (MusicService.MusicBinder)iBinder;
                 musicService = binder.getService();
                 MusicServiceFragment.this.onServiceConnected(musicService);
-                binder.getService().toBackground();
-                boundService=true;
             }
 
             @Override

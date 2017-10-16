@@ -17,17 +17,18 @@ import com.squareup.picasso.Callback;
 import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Created by deadsec on 9/4/17.
  */
 
 public class AlbumAdapter extends RecyclerView.Adapter<AlbumAdapter.ViewHolder> {
-    ArrayList<AlbumModel> albums;
+    List<AlbumModel> albums;
     Context context;
     public AlbumClickListener albumClickListener;
 
-    public AlbumAdapter(ArrayList<AlbumModel> albums, Context context) {
+    public AlbumAdapter(List<AlbumModel> albums, Context context) {
         this.albums = albums;
         this.context = context;
     }
@@ -43,12 +44,7 @@ public class AlbumAdapter extends RecyclerView.Adapter<AlbumAdapter.ViewHolder> 
         final AlbumModel albumModel = albums.get(position);
         holder.albumName.setText(albumModel.getName());
         holder.albumNoOfSong.setText(albumModel.getNoOfSong()+ " songs");
-        Picasso.with(context).load(albumModel.getCoverArt()).into(holder.albumImage,new Callback(){
-                @Override
-                public void onSuccess() { }
-                @Override
-                public void onError() { Picasso.with(context).load(R.drawable.album_default).into(holder.albumImage); }
-        });
+        Picasso.with(context).load(albumModel.getCoverArt()).placeholder(R.drawable.album_default).into(holder.albumImage);
         holder.cardView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {

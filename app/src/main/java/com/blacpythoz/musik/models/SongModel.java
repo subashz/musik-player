@@ -27,6 +27,10 @@ public class SongModel {
         return new SongModel(0,"","","","","","",0,0,0,0,0,0,0,0);
     }
 
+    public void setAlbumArt(String albumArt) {
+        this.albumArt = albumArt;
+    }
+
     public SongModel(int id, String title, String artistName,
                      String composer, String albumName, String albumArt,
                      String data, int trackNumber, int year, long duration,

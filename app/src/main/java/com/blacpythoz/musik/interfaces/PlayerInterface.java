@@ -10,12 +10,11 @@ import java.util.ArrayList;
 public interface PlayerInterface {
 
     void start();
-    void play(int pos);
+    void play(long songId);
     void play(SongModel song);
     void pause();
     void stop();
     void seekTo(int position);
-    void loadMedia();
     boolean isPlaying();
     long getDuration();
     int getCurrentStreamPosition();
