@@ -6,6 +6,7 @@ import android.graphics.Color;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.Looper;
 import android.provider.MediaStore;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -40,7 +41,7 @@ import java.io.IOException;
 
 public class SongPlayerFragment extends MusicServiceFragment {
 
-    public static final String TAG="SongPlayerFragment";
+    public static final String TAG = "SongPlayerFragment";
 
     private SeekBar seekBar;
     private TextView currentSong;
@@ -58,10 +59,13 @@ public class SongPlayerFragment extends MusicServiceFragment {
 
     private MusicService musicService;
     private boolean musicServiceStatus = false;
+    private SongSeekBarThread seekBarThread;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        seekBarThread = new SongSeekBarThread();
+        seekBarThread.start();
     }
 
     @Nullable
@@ -69,18 +73,18 @@ public class SongPlayerFragment extends MusicServiceFragment {
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.panel_player_interface, container, false);
 
-        panelLayout =  view.findViewById(R.id.cl_player_interface);
+        panelLayout = view.findViewById(R.id.cl_player_interface);
         bottomSheetBehavior = BottomSheetBehavior.from(panelLayout);
 
         // dp to pixel
         int heightInPixel = Helper.dpToPx(getActivity(), 70);
         bottomSheetBehavior.setPeekHeight(heightInPixel);
 
-        currentSong =  view.findViewById(R.id.tv_panel_song_name);
-        currentArtist =  view.findViewById(R.id.tv_panel_artist_name);
-        currentCoverArt =  view.findViewById(R.id.iv_pn_cover_art);
-        actionBtn =  view.findViewById(R.id.iv_pn_action_btn);
-        seekBar =  view.findViewById(R.id.sb_pn_player);
+        currentSong = view.findViewById(R.id.tv_panel_song_name);
+        currentArtist = view.findViewById(R.id.tv_panel_artist_name);
+        currentCoverArt = view.findViewById(R.id.iv_pn_cover_art);
+        actionBtn = view.findViewById(R.id.iv_pn_action_btn);
+        seekBar = view.findViewById(R.id.sb_pn_player);
 
         panelPlayBtn = view.findViewById(R.id.iv_pn_play_btn);
         panelNextBtn = view.findViewById(R.id.iv_pn_next_btn);
@@ -88,7 +92,10 @@ public class SongPlayerFragment extends MusicServiceFragment {
 
         params = (ConstraintLayout.LayoutParams) currentSong.getLayoutParams();
 
-        if(musicServiceStatus) { updateUI(); handleAllAction(); }
+        if (musicServiceStatus) {
+            updateUI();
+            handleAllAction();
+        }
 
         return view;
     }
@@ -96,7 +103,7 @@ public class SongPlayerFragment extends MusicServiceFragment {
     @Override
     public void onServiceConnected(MusicService musicService) {
         this.musicService = musicService;
-        musicServiceStatus=true;
+        musicServiceStatus = true;
         updateUI();
         handleAllAction();
     }
@@ -209,8 +216,6 @@ public class SongPlayerFragment extends MusicServiceFragment {
 
             @Override
             public void onTrackChange(SongModel song) {
-//                seekBar.setProgress(0);
-//                seekBar.setMax((int)song.getDuration()/1000);
                 Log.i(TAG, "track duration:" + song.getDuration());
                 updateUiOnTrackChange(song);
             }
@@ -230,7 +235,12 @@ public class SongPlayerFragment extends MusicServiceFragment {
                 try {
                     Thread.sleep(1000);
                     if (musicService != null) {
-                        //    seekBar.setProgress(musicService.getCurrentStreamPosition()/1000);
+                        getActivity().runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                seekBar.setProgress(musicService.getCurrentStreamPosition() / 1000);
+                            }
+                        });
                     }
                 } catch (Exception e) {
                     e.printStackTrace();
@@ -241,15 +251,11 @@ public class SongPlayerFragment extends MusicServiceFragment {
 
     // this updates the ui on music changes in new runnable
     public void updateUiOnTrackChange(final SongModel song) {
-        new Handler().post(new Runnable() {
+        Thread updateThread = new Thread() {
+            Bitmap bitmap = null;
             @Override
             public void run() {
-                currentSong.setText(song.getTitle());
-                actionBtn.setBackgroundResource(R.drawable.ic_media_pause);
-                panelPlayBtn.setBackgroundResource(R.drawable.ic_action_pause);
-                currentArtist.setText(song.getArtistName());
-                Uri imageUri = Uri.parse(song.getAlbumArt());
-                Bitmap bitmap = null;
+               Uri imageUri = Uri.parse(song.getAlbumArt());
                 try {
                     bitmap = MediaStore.Images.Media.getBitmap(getActivity().getContentResolver(), imageUri);
                 } catch (FileNotFoundException e) {
@@ -257,9 +263,26 @@ public class SongPlayerFragment extends MusicServiceFragment {
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
+
+
+                getActivity().runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                seekBar.setProgress(0);
+                seekBar.setMax((int)song.getDuration()/1000);
+                seekBar.setMax((int) song.getDuration() / 1000);
+                seekBar.setProgress(musicService.getCurrentStreamPosition());
+                currentSong.setText(song.getTitle());
+                actionBtn.setBackgroundResource(R.drawable.ic_media_pause);
+                panelPlayBtn.setBackgroundResource(R.drawable.ic_action_pause);
+                currentArtist.setText(song.getArtistName());
                 currentCoverArt.setImageBitmap(bitmap);
+                    }
+                });
             }
-        });
+        };
+        updateThread.start();
+
     }
 
     @Override
@@ -275,9 +298,10 @@ public class SongPlayerFragment extends MusicServiceFragment {
     }
 
     public void updateUI() {
-        if(musicService!=null) {
+        if (musicService != null) {
             SongModel song = musicService.getCurrentSong();
             updateUiOnTrackChange(song);
+            Log.d(TAG, "updateUI called");
         }
     }
 

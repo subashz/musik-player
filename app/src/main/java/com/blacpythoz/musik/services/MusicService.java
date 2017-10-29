@@ -180,7 +180,6 @@ public class MusicService extends Service implements
         audioManager = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
         int result = audioManager.requestAudioFocus(this, AudioManager.STREAM_MUSIC, AudioManager.AUDIOFOCUS_GAIN);
         if (result == AudioManager.AUDIOFOCUS_REQUEST_GRANTED) {
-            Log.i(TAG, "Got audio focus");
             audioFocusState = true;
         } else {
             audioFocusState = false;
