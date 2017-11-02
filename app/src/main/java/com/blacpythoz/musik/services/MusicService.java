@@ -70,6 +70,7 @@ public class MusicService extends Service implements
         mPlayerThread=new PlayerThread();
         mPlayerThread.start();
         initMusicService();
+        Log.i(TAG,"onCreate Service");
     }
 
     @Override
@@ -200,6 +201,8 @@ public class MusicService extends Service implements
 
     @Override
     public void onDestroy() {
+        super.onDestroy();
+        Log.d(TAG,"onDestroy Music Service");
         MusicPreference.get(this).setCurrentSongStatus(currentSong.getId(), player.getCurrentPosition());
         player.stop();
         player.release();
@@ -264,19 +267,25 @@ public class MusicService extends Service implements
     public boolean isPlaying() {
         if (player != null) {
             return player.isPlaying();
-        } else {
-            return false;
         }
+        return false;
     }
 
     @Override
     public int getCurrentStreamPosition() {
-        return player.getCurrentPosition();
+        if(player !=null) {
+            return player.getCurrentPosition();
+        }
+        return 0;
     }
 
     @Override
     public long getDuration() {
-        return player.getDuration();
+        if(player !=null) {
+            return player.getDuration();
+        }else {
+            return 0;
+        }
     }
 
     @Override
@@ -326,6 +335,7 @@ public class MusicService extends Service implements
     // notifications
     public void toForeground() {
         startForeground(NOTIFICATION_ID, NotificationHandler.createNotification(this, currentSong));
+        Log.d(TAG,"toForeground() called");
     }
 
     // kill the foreground notification, so that service

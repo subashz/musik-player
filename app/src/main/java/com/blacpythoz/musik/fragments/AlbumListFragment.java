@@ -53,6 +53,11 @@ public class AlbumListFragment extends MusicServiceFragment {
         initFragment();
     }
 
+    @Override
+    public void onServiceDisconnected() {
+
+    }
+
 
     public void initFragment() {
         albums = musicService.getAlbums();

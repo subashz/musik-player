@@ -17,21 +17,34 @@ import com.blacpythoz.musik.services.MusicService;
 
 public abstract class MusicServiceActivity extends PermitActivity {
     public static final String TAG = MusicServiceActivity.class.getSimpleName();
+    public static final String PLAY_STATE = "play_state";
+    public static final String SONG_ID = "song_id";
+    public static final String DURATION = "duration";
     ServiceConnection serviceConnection;
+    boolean isPlaying = false;
     public static MusicService musicService;
     boolean boundService = false;
     Intent playIntent;
+    MusicService.MusicBinder binder;
 
-    @Override
-    public void onCreate(@Nullable Bundle savedInstanceState) {
+    public void onCreate(@Nullable final Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        Log.d(TAG,"onCreate of "+TAG);
+        if (savedInstanceState != null) {
+            isPlaying = savedInstanceState.getBoolean(PLAY_STATE);
+        }
         serviceConnection = new ServiceConnection() {
             @Override
             public void onServiceConnected(ComponentName componentName, IBinder iBinder) {
-                MusicService.MusicBinder binder = (MusicService.MusicBinder) iBinder;
+                binder = (MusicService.MusicBinder) iBinder;
                 musicService = binder.getService();
                 MusicServiceActivity.this.onServiceConnected();
-                binder.getService().toBackground();
+
+                if(isPlaying) {
+                    musicService.play(savedInstanceState.getLong(SONG_ID));
+                    musicService.seekTo(savedInstanceState.getInt(DURATION));
+                    musicService.toBackground();
+                }
                 boundService = true;
             }
 
@@ -59,18 +72,23 @@ public abstract class MusicServiceActivity extends PermitActivity {
     @Override
     protected void onStop() {
         super.onStop();
-        Log.i(TAG, "onStopCalled()");
+        Log.i(TAG, "onStopCalled() of "+TAG);
         runServiceIfSongIsPlaying();
     }
 
     void runServiceIfSongIsPlaying() {
+        Log.d(TAG,"runServiceIfSUngIsPlaying");
         if (boundService) {
-            if (musicService.isPlaying()) {
+            Log.d(TAG,"boundService");
+            if (musicService.isPlaying() || isChangingConfigurations()) {
+                Log.d(TAG,"toForeground");
                 musicService.toForeground();
             } else {
-                stopService(playIntent);
+                    stopService(playIntent);
             }
             unbindService(serviceConnection);
+            //tesing
+            binder = null;
             boundService = false;
         }
     }
@@ -78,6 +96,15 @@ public abstract class MusicServiceActivity extends PermitActivity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        Log.i(TAG, "onDestroyCalled");
+        Log.d(TAG,"onDestroy of "+TAG);
+        runServiceIfSongIsPlaying();
+    }
+
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putBoolean(PLAY_STATE, musicService.isPlaying());
+        outState.putLong(SONG_ID,musicService.getCurrentSong().getId());
+        outState.putInt(DURATION,musicService.getCurrentStreamPosition());
     }
 }

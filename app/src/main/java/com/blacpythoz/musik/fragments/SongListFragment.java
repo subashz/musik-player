@@ -51,6 +51,11 @@ public class SongListFragment extends MusicServiceFragment {
         initFragment();
     }
 
+    @Override
+    public void onServiceDisconnected() {
+
+    }
+
     public void handleSongClick() {
 
         //click on song item title and artist name listener

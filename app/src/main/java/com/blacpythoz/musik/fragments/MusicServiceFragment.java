@@ -8,6 +8,8 @@ import android.os.Bundle;
 import android.os.IBinder;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.util.Log;
+
 import com.blacpythoz.musik.services.MusicService;
 
 /**
@@ -36,7 +38,8 @@ public abstract class MusicServiceFragment extends Fragment {
 
             @Override
             public void onServiceDisconnected(ComponentName componentName) {
-
+                Log.d(TAG,"onServiceDisconnected");
+                MusicServiceFragment.this.onServiceDisconnected();
             }
         };
     }
@@ -45,6 +48,7 @@ public abstract class MusicServiceFragment extends Fragment {
     // mug. yo function gets called after service connected
     // so it must be override
     public abstract void onServiceConnected(MusicService musicService);
+    public abstract void onServiceDisconnected();
 
     @Override
     public void onStart() {
@@ -58,7 +62,10 @@ public abstract class MusicServiceFragment extends Fragment {
     @Override
     public void onDestroy() {
         super.onDestroy();
+        Log.d(TAG,"onStop()");
+        MusicServiceFragment.this.onServiceDisconnected();
         getActivity().stopService(playIntent);
         getActivity().unbindService(serviceConnection);
+
         }
     }

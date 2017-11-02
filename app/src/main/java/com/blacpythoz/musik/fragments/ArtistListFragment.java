@@ -49,6 +49,11 @@ public class ArtistListFragment extends MusicServiceFragment {
         initFragment();
     }
 
+    @Override
+    public void onServiceDisconnected() {
+
+    }
+
     public void initFragment() {
             artists = musicService.getArtists();
             artistAdapter = new ArtistAdapter(artists, getContext());

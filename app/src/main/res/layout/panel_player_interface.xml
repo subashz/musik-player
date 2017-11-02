@@ -69,11 +69,8 @@
     <TextView
         android:id="@+id/tv_panel_song_name"
         android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        tools:hint="On the fllor"
+        android:layout_height="29dp"
         android:layout_marginLeft="8dp"
-        android:layout_marginRight="0dp"
-        android:layout_marginStart="16dp"
         android:layout_marginTop="4dp"
         android:ellipsize="end"
         android:lines="1"
@@ -81,7 +78,8 @@
         android:textSize="18sp"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toLeftOf="@+id/iv_pn_action_btn"
-        app:layout_constraintTop_toTopOf="parent"/>
+        app:layout_constraintTop_toTopOf="parent"
+        tools:hint="On the fllor" />
 
     <ImageView
         android:id="@+id/iv_pn_cover_art"
@@ -133,5 +131,23 @@
         app:layout_constraintTop_toTopOf="@+id/tv_panel_song_name"
         app:layout_constraintVertical_bias="0.571"
         />
+
+    <TextView
+        android:id="@+id/tv_pn_total_time"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:text="5:20"
+        app:layout_constraintBottom_toTopOf="@+id/sb_pn_player"
+        app:layout_constraintStart_toStartOf="@+id/sb_pn_player" />
+
+    <TextView
+        android:id="@+id/tv_pn_remain_time"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="8dp"
+        android:text="1:20:00"
+        app:layout_constraintBottom_toTopOf="@+id/sb_pn_player"
+        app:layout_constraintEnd_toEndOf="@+id/sb_pn_player" />
 
 </android.support.constraint.ConstraintLayout>

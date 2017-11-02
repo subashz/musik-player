@@ -27,14 +27,18 @@
             android:background="?attr/colorPrimary"
             app:layout_scrollFlags="scroll|enterAlways"
             app:popupTheme="@style/AppTheme.PopupOverlay"
-            app:title="@string/player_interface_title">
+            app:title="@string/player_interface_title"
+            app:titleTextColor="@color/colorPrimaryTextTab">
 
         </android.support.v7.widget.Toolbar>
 
         <android.support.design.widget.TabLayout
             android:id="@+id/tabs"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content" />
+            android:layout_height="wrap_content"
+            app:tabIndicatorColor="@color/colorPrimar2"
+            app:tabSelectedTextColor="@color/colorPrimaryTextTab"
+            app:tabTextColor="@color/colorPrimaryTextTab" />
 
     </android.support.design.widget.AppBarLayout>
 

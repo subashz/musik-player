@@ -46,6 +46,8 @@ public class SongPlayerFragment extends MusicServiceFragment {
     private SeekBar seekBar;
     private TextView currentSong;
     private TextView currentArtist;
+    private TextView totalTime;
+    private TextView remainingTime;
 
     private ImageView currentCoverArt;
     private ImageView actionBtn;
@@ -66,6 +68,7 @@ public class SongPlayerFragment extends MusicServiceFragment {
         super.onCreate(savedInstanceState);
         seekBarThread = new SongSeekBarThread();
         seekBarThread.start();
+        setRetainInstance(true);
     }
 
     @Nullable
@@ -85,6 +88,8 @@ public class SongPlayerFragment extends MusicServiceFragment {
         currentCoverArt = view.findViewById(R.id.iv_pn_cover_art);
         actionBtn = view.findViewById(R.id.iv_pn_action_btn);
         seekBar = view.findViewById(R.id.sb_pn_player);
+        totalTime = view.findViewById(R.id.tv_pn_total_time);
+        remainingTime = view.findViewById(R.id.tv_pn_remain_time);
 
         panelPlayBtn = view.findViewById(R.id.iv_pn_play_btn);
         panelNextBtn = view.findViewById(R.id.iv_pn_next_btn);
@@ -106,6 +111,11 @@ public class SongPlayerFragment extends MusicServiceFragment {
         musicServiceStatus = true;
         updateUI();
         handleAllAction();
+    }
+
+    @Override
+    public void onServiceDisconnected() {
+        musicServiceStatus = false;
     }
 
     // done in this methods
@@ -234,11 +244,16 @@ public class SongPlayerFragment extends MusicServiceFragment {
             while (true) {
                 try {
                     Thread.sleep(1000);
-                    if (musicService != null) {
+                    if (musicServiceStatus) {
+                        final String strTotalTime = Helper.toTimeFormat(musicService.getDuration());
+                        final String strRemainTIme = Helper.toTimeFormat(musicService.getDuration() - musicService.getCurrentStreamPosition());
                         getActivity().runOnUiThread(new Runnable() {
                             @Override
                             public void run() {
                                 seekBar.setProgress(musicService.getCurrentStreamPosition() / 1000);
+                                totalTime.setText(strTotalTime);
+                                remainingTime.setText(strRemainTIme);
+
                             }
                         });
                     }
@@ -253,9 +268,10 @@ public class SongPlayerFragment extends MusicServiceFragment {
     public void updateUiOnTrackChange(final SongModel song) {
         Thread updateThread = new Thread() {
             Bitmap bitmap = null;
+
             @Override
             public void run() {
-               Uri imageUri = Uri.parse(song.getAlbumArt());
+                Uri imageUri = Uri.parse(song.getAlbumArt());
                 try {
                     bitmap = MediaStore.Images.Media.getBitmap(getActivity().getContentResolver(), imageUri);
                 } catch (FileNotFoundException e) {
@@ -268,15 +284,17 @@ public class SongPlayerFragment extends MusicServiceFragment {
                 getActivity().runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
-                seekBar.setProgress(0);
-                seekBar.setMax((int)song.getDuration()/1000);
-                seekBar.setMax((int) song.getDuration() / 1000);
-                seekBar.setProgress(musicService.getCurrentStreamPosition());
-                currentSong.setText(song.getTitle());
-                actionBtn.setBackgroundResource(R.drawable.ic_media_pause);
-                panelPlayBtn.setBackgroundResource(R.drawable.ic_action_pause);
-                currentArtist.setText(song.getArtistName());
-                currentCoverArt.setImageBitmap(bitmap);
+                        seekBar.setProgress(0);
+                        seekBar.setMax((int) song.getDuration() / 1000);
+                        seekBar.setMax((int) song.getDuration() / 1000);
+                        if (musicServiceStatus) {
+                            seekBar.setProgress(musicService.getCurrentStreamPosition());
+                        }
+                        currentSong.setText(song.getTitle());
+                        actionBtn.setBackgroundResource(R.drawable.ic_media_pause);
+                        panelPlayBtn.setBackgroundResource(R.drawable.ic_action_pause);
+                        currentArtist.setText(song.getArtistName());
+                        currentCoverArt.setImageBitmap(bitmap);
                     }
                 });
             }
@@ -288,7 +306,9 @@ public class SongPlayerFragment extends MusicServiceFragment {
     @Override
     public void onPause() {
         super.onPause();
-        bottomSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
+        if(bottomSheetBehavior.getState()==BottomSheetBehavior.STATE_EXPANDED) {
+            bottomSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
+        }
     }
 
     @Override

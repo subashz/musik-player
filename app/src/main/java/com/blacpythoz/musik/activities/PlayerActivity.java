@@ -34,6 +34,7 @@ public class PlayerActivity extends MusicServiceActivity {
 
     @Override
     public void onServiceConnected() {
+        Log.d(TAG,"onService Connected");
         handleAllView();
     }
 
@@ -41,6 +42,7 @@ public class PlayerActivity extends MusicServiceActivity {
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         viewPager = (ViewPager) findViewById(R.id.container);
+        viewPager.setOffscreenPageLimit(4);
         setupViewPager(viewPager);
         tabLayout = (TabLayout) findViewById(R.id.tabs);
         tabLayout.setupWithViewPager(viewPager);
