@@ -4,7 +4,7 @@
     tools:context="com.blacpythoz.musik.activities.PlayerActivity">
     <item
         android:id="@+id/searchSongItem"
-        android:icon="@android:drawable/ic_menu_search"
+        android:icon="@drawable/ic_search"
         android:tag="Search Items"
         android:title="Search"
         app:showAsAction="always" />

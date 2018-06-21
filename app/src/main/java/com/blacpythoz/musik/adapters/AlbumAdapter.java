@@ -44,7 +44,7 @@ public class AlbumAdapter extends RecyclerView.Adapter<AlbumAdapter.ViewHolder> 
         final AlbumModel albumModel = albums.get(position);
         holder.albumName.setText(albumModel.getName());
         holder.albumNoOfSong.setText(albumModel.getNoOfSong()+ " songs");
-        Picasso.with(context).load(albumModel.getCoverArt()).placeholder(R.drawable.album_default).into(holder.albumImage);
+        Picasso.with(context).load(albumModel.getCoverArt()).placeholder(R.drawable.default_album_icon).into(holder.albumImage);
         holder.cardView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {

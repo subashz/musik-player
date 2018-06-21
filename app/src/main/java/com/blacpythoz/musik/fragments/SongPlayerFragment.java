@@ -34,6 +34,9 @@ import com.blacpythoz.musik.utils.Helper;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 
+import de.hdodenhof.circleimageview.CircleImageView;
+import jp.wasabeef.blurry.Blurry;
+
 
 /**
  * Created by deadsec on 9/20/17.
@@ -49,7 +52,8 @@ public class SongPlayerFragment extends MusicServiceFragment {
     private TextView totalTime;
     private TextView remainingTime;
 
-    private ImageView currentCoverArt;
+    private CircleImageView currentCoverArt;
+    private ImageView currentCoverArtShadow;
     private ImageView actionBtn;
     private ImageView panelPlayBtn;
     private ImageView panelNextBtn;
@@ -79,13 +83,14 @@ public class SongPlayerFragment extends MusicServiceFragment {
         panelLayout = view.findViewById(R.id.cl_player_interface);
         bottomSheetBehavior = BottomSheetBehavior.from(panelLayout);
 
-        // dp to pixel
-        int heightInPixel = Helper.dpToPx(getActivity(), 70);
-        bottomSheetBehavior.setPeekHeight(heightInPixel);
+//        // dp to pixel
+//        int heightInPixel = Helper.dpToPx(getActivity(), 70);
+//        bottomSheetBehavior.setPeekHeight(heightInPixel);
 
         currentSong = view.findViewById(R.id.tv_panel_song_name);
         currentArtist = view.findViewById(R.id.tv_panel_artist_name);
         currentCoverArt = view.findViewById(R.id.iv_pn_cover_art);
+        currentCoverArtShadow = view.findViewById(R.id.iv_pn_cover_art_shadow);
         actionBtn = view.findViewById(R.id.iv_pn_action_btn);
         seekBar = view.findViewById(R.id.sb_pn_player);
         totalTime = view.findViewById(R.id.tv_pn_total_time);
@@ -122,7 +127,13 @@ public class SongPlayerFragment extends MusicServiceFragment {
     public void handleAllAction() {
 
         //set default
-        actionBtn.setBackgroundResource(R.drawable.ic_media_play);
+        if (musicService.isPlaying()) {
+            actionBtn.setBackgroundResource(R.drawable.ic_media_pause);
+        } else {
+            actionBtn.setBackgroundResource(R.drawable.ic_media_play);
+
+        }
+
         //for the action button
         actionBtn.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -167,6 +178,7 @@ public class SongPlayerFragment extends MusicServiceFragment {
             }
         });
 
+
         // for the sliding panel buttons
         panelNextBtn.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -181,6 +193,13 @@ public class SongPlayerFragment extends MusicServiceFragment {
                 musicService.playPrev();
             }
         });
+
+        if (musicService.isPlaying()) {
+            panelPlayBtn.setBackgroundResource(R.drawable.ic_action_pause);
+        } else {
+            panelPlayBtn.setBackgroundResource(R.drawable.ic_action_play);
+        }
+
 
         panelPlayBtn.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -208,7 +227,7 @@ public class SongPlayerFragment extends MusicServiceFragment {
             @Override
             public void onSlide(@NonNull View bottomSheet, float slideOffset) {
                 // animating the views when panel expanding and collapsing
-                params.topMargin = Helper.dpToPx(getActivity(), slideOffset * 30 + 4);
+                params.topMargin = Helper.dpToPx(getActivity(), slideOffset * 30 + 5);
                 actionBtn.setAlpha(1 - slideOffset);
                 currentCoverArt.setAlpha(slideOffset);
                 panelNextBtn.setAlpha(slideOffset);
@@ -295,6 +314,8 @@ public class SongPlayerFragment extends MusicServiceFragment {
                         panelPlayBtn.setBackgroundResource(R.drawable.ic_action_pause);
                         currentArtist.setText(song.getArtistName());
                         currentCoverArt.setImageBitmap(bitmap);
+                        Blurry.with(getActivity()).radius(20).sampling(2).from(bitmap).into(currentCoverArtShadow);
+
                     }
                 });
             }
@@ -306,7 +327,9 @@ public class SongPlayerFragment extends MusicServiceFragment {
     @Override
     public void onPause() {
         super.onPause();
-        if(bottomSheetBehavior.getState()==BottomSheetBehavior.STATE_EXPANDED) {
+        Log.d(TAG, "SongPlayer Fragment On Pause Called");
+
+        if (bottomSheetBehavior.getState() == BottomSheetBehavior.STATE_EXPANDED) {
             bottomSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
         }
     }
@@ -314,6 +337,7 @@ public class SongPlayerFragment extends MusicServiceFragment {
     @Override
     public void onResume() {
         super.onResume();
+        Log.d(TAG, "SongPlayer Fragment On Resume Called");
         updateUI();
     }
 
@@ -321,7 +345,7 @@ public class SongPlayerFragment extends MusicServiceFragment {
         if (musicService != null) {
             SongModel song = musicService.getCurrentSong();
             updateUiOnTrackChange(song);
-            Log.d(TAG, "updateUI called");
+            Log.d(TAG, "updateUI called with current song is: " + song.getTitle());
         }
     }
 

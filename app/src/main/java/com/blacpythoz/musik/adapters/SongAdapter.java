@@ -49,7 +49,7 @@ public class SongAdapter extends RecyclerView.Adapter<SongAdapter.ViewHolder>{
         holder.tvArtistName.setText(song.getArtistName());
 
         if(song.getAlbumArt() != "") {
-            Picasso.with(context).load(song.getAlbumArt()).into(holder.ivSongCoverArt);
+            Picasso.with(context).load(song.getAlbumArt()).placeholder(R.drawable.default_song_art).into(holder.ivSongCoverArt);
         }
         holder.constraintLayout.setOnClickListener(new View.OnClickListener() {
 

@@ -1,6 +1,7 @@
 package com.blacpythoz.musik.services;
 
 import android.app.Notification;
+import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.Service;
 import android.content.Context;
@@ -47,7 +48,8 @@ public class MusicService extends Service implements
         AudioManager.OnAudioFocusChangeListener {
 
     private static final String TAG = MusicService.class.getSimpleName();
-    private static final int NOTIFICATION_ID = 123;
+    private static final int NOTIFICATION_ID = 12302;
+
     private MediaPlayer player;
     private SongModel currentSong;
     private int currentSongPosition;
@@ -56,6 +58,8 @@ public class MusicService extends Service implements
     private AudioManager audioManager;
     private boolean audioFocusState = false;
     PlayerThread mPlayerThread;
+
+    private boolean firstTime = true;
 
     @Nullable
     @Override
@@ -67,30 +71,32 @@ public class MusicService extends Service implements
     public void onCreate() {
         super.onCreate();
         player = new MediaPlayer();
-        mPlayerThread=new PlayerThread();
+        mPlayerThread = new PlayerThread();
         mPlayerThread.start();
         initMusicService();
-        Log.i(TAG,"onCreate Service");
+        Log.i(TAG, "onCreate Service");
     }
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
+        NotificationManager mNotificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+//        mNotificationManager.notify();
         switch (intent.getAction()) {
-            case "":
-                NotificationHandler.createNotification(this, currentSong);
-                break;
+//            case "":
+//                mNotificationManager.notify(NOTIFICATION_ID,NotificationHandler.createNotification(this, currentSong));
+//                break;
             case "action.prev":
                 playPrev();
-                NotificationHandler.createNotification(this, currentSong);
+                mNotificationManager.notify(NOTIFICATION_ID, NotificationHandler.createNotification(this, currentSong, true));
+                break;
+            case "action.pause":
+                pause();
+                mNotificationManager.notify(NOTIFICATION_ID, NotificationHandler.createNotification(this, currentSong, false));
                 break;
             case "action.play":
-                NotificationHandler.createNotification(this, currentSong);
+                mNotificationManager.notify(NOTIFICATION_ID, NotificationHandler.createNotification(this, currentSong, true));
                 if (player != null) {
-                    if (isPlaying()) {
-                        pause();
-                    } else {
-                        start();
-                    }
+                    start();
                 } else {
                     initMusicService();
                     start();
@@ -98,7 +104,7 @@ public class MusicService extends Service implements
                 break;
             case "action.next":
                 playNext();
-                NotificationHandler.createNotification(this, currentSong);
+                mNotificationManager.notify(NOTIFICATION_ID, NotificationHandler.createNotification(this, currentSong, true));
                 break;
             case "action.stop":
                 stop();
@@ -202,7 +208,7 @@ public class MusicService extends Service implements
     @Override
     public void onDestroy() {
         super.onDestroy();
-        Log.d(TAG,"onDestroy Music Service");
+        Log.d(TAG, "onDestroy Music Service");
         MusicPreference.get(this).setCurrentSongStatus(currentSong.getId(), player.getCurrentPosition());
         player.stop();
         player.release();
@@ -221,8 +227,14 @@ public class MusicService extends Service implements
     // Overriding the Player Interface methods
     @Override
     public void start() {
-        player.start();
+        if (firstTime) {
+            play(currentSong);
+            firstTime = false;
+        } else {
+            player.start();
+        }
     }
+
 
     @Override
     public void play(long songId) {
@@ -273,7 +285,7 @@ public class MusicService extends Service implements
 
     @Override
     public int getCurrentStreamPosition() {
-        if(player !=null) {
+        if (player != null) {
             return player.getCurrentPosition();
         }
         return 0;
@@ -281,9 +293,9 @@ public class MusicService extends Service implements
 
     @Override
     public long getDuration() {
-        if(player !=null) {
+        if (player != null) {
             return player.getDuration();
-        }else {
+        } else {
             return 0;
         }
     }
@@ -312,11 +324,16 @@ public class MusicService extends Service implements
     }
 
     public void playNext() {
-        play(currentSongPosition + 1);
+//        play(currentSongPosition + 1);
+        play(SongDataLab.get(this).getNextSong(currentSong));
     }
 
     public void playPrev() {
-        play(currentSongPosition - 1);
+
+//        play(currentSongPosition - 1);
+
+        play(SongDataLab.get(this).getPreviousSong(currentSong));
+
     }
 
     public List<AlbumModel> getAlbums() {
@@ -334,8 +351,8 @@ public class MusicService extends Service implements
     // switch the current service to the foreground by creating the
     // notifications
     public void toForeground() {
-        startForeground(NOTIFICATION_ID, NotificationHandler.createNotification(this, currentSong));
-        Log.d(TAG,"toForeground() called");
+        startForeground(NOTIFICATION_ID, NotificationHandler.createNotification(this, currentSong, true));
+        Log.d(TAG, "toForeground() called");
     }
 
     // kill the foreground notification, so that service
@@ -344,6 +361,7 @@ public class MusicService extends Service implements
         stopForeground(true);
     }
 
+
     public class PlayerThread extends Thread {
         private Handler mHandler;
 
@@ -351,11 +369,13 @@ public class MusicService extends Service implements
         public void run() {
             super.run();
             Looper.prepare();
-            mHandler=new Handler();
+            mHandler = new Handler();
             Looper.loop();
         }
 
         public void play(final SongModel song) {
+            currentSong = song;
+
             mHandler.post(new Runnable() {
                 @Override
                 public void run() {
@@ -366,6 +386,7 @@ public class MusicService extends Service implements
                             Log.i(TAG, song.getBookmark() + "");
                             player.prepareAsync();
                             MusicService.this.callback.onTrackChange(song);
+
                         } catch (Exception e) {
                             Log.e(TAG, "Error playing from data source", e);
                         }
@@ -376,12 +397,12 @@ public class MusicService extends Service implements
 
         public void prepareNext() {
 
-    }
+        }
 
-    public void exit() {
-        mHandler.getLooper().quit();
+        public void exit() {
+            mHandler.getLooper().quit();
+        }
     }
-}
 
 
 }

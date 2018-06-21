@@ -1,5 +1,7 @@
 package com.blacpythoz.musik.activities;
 
+import android.app.NotificationManager;
+import android.content.Context;
 import android.content.Intent;
 import android.content.res.Configuration;
 import android.support.design.widget.TabLayout;
@@ -10,6 +12,7 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
 
 import com.blacpythoz.musik.R;
 import com.blacpythoz.musik.adapters.AlbumAdapter;
@@ -19,6 +22,7 @@ import com.blacpythoz.musik.fragments.ArtistListFragment;
 import com.blacpythoz.musik.fragments.PlayListFragment;
 import com.blacpythoz.musik.fragments.SongListFragment;
 import com.blacpythoz.musik.fragments.SongPlayerFragment;
+import com.blacpythoz.musik.services.MusicService;
 
 
 public class PlayerActivity extends MusicServiceActivity {
@@ -30,6 +34,20 @@ public class PlayerActivity extends MusicServiceActivity {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_player);
+
+        getWindow().getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR);
+
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        removeNotification();
+    }
+
+    public void removeNotification() {
+        NotificationManager notificationManager = (NotificationManager) getApplicationContext().getSystemService(Context.NOTIFICATION_SERVICE);
+        notificationManager.cancel(12302);
     }
 
     @Override
@@ -41,6 +59,7 @@ public class PlayerActivity extends MusicServiceActivity {
     public void handleAllView() {
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
+
         viewPager = (ViewPager) findViewById(R.id.container);
         viewPager.setOffscreenPageLimit(4);
         setupViewPager(viewPager);

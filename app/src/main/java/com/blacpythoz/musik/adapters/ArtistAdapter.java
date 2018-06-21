@@ -38,7 +38,7 @@ public class ArtistAdapter extends RecyclerView.Adapter<ArtistAdapter.ViewHolder
     @Override
     public void onBindViewHolder(ArtistAdapter.ViewHolder holder, int position) {
         ArtistModel artistModel = artists.get(position);
-        Picasso.with(context).load(artistModel.getArtistImage()).into(holder.artistImage);
+        Picasso.with(context).load(artistModel.getArtistImage()).placeholder(R.drawable.default_album_icon).into(holder.artistImage);
         holder.artistName.setText(artistModel.getArtistName());
         holder.songCount.setText(artistModel.getSongCount()+"");
         holder.albumCount.setText(artistModel.getAlbumCount()+"");

@@ -7,32 +7,36 @@
     android:layout_height="match_parent"
     android:background="#fff"
     android:elevation="24dp"
+    app:layout_insetEdge="none"
     android:paddingBottom="10dp"
-    android:paddingTop="10dp"
-     app:layout_behavior="@string/bottom_sheet_behavior">
+    app:behavior_peekHeight="66dp"
+    app:behavior_hideable="true"
+    app:layout_behavior="@string/bottom_sheet_behavior">
 
 
     <ImageView
         android:id="@+id/iv_pn_play_btn"
         android:layout_width="100dp"
         android:layout_height="100dp"
-        android:layout_marginBottom="16dp"
         android:background="@drawable/ic_action_pause"
-        app:layout_constraintBottom_toTopOf="@+id/sb_pn_player"
-        app:layout_constraintLeft_toRightOf="@+id/iv_pn_prev_btn"
-        app:layout_constraintRight_toLeftOf="@+id/iv_pn_next_btn" />
+
+        android:elevation="100dp"
+        app:layout_constraintBottom_toBottomOf="@+id/iv_pn_next_btn"
+        app:layout_constraintEnd_toStartOf="@+id/iv_pn_next_btn"
+        app:layout_constraintHorizontal_bias="0.5"
+        app:layout_constraintStart_toEndOf="@+id/iv_pn_prev_btn"
+        app:layout_constraintTop_toTopOf="@+id/iv_pn_next_btn" />
 
     <ImageView
         android:id="@+id/iv_pn_prev_btn"
         android:layout_width="60dp"
         android:layout_height="60dp"
-        android:layout_marginBottom="8dp"
-        android:layout_marginLeft="8dp"
-        android:layout_marginStart="8dp"
-        android:layout_marginTop="8dp"
+        android:elevation="100dp"
+
         app:layout_constraintBottom_toBottomOf="@+id/iv_pn_play_btn"
-        app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintRight_toLeftOf="@+id/iv_pn_play_btn"
+        app:layout_constraintEnd_toStartOf="@+id/iv_pn_play_btn"
+        app:layout_constraintHorizontal_bias="0.5"
+        app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="@+id/iv_pn_play_btn"
         app:srcCompat="@drawable/ic_action_prev" />
 
@@ -40,38 +44,34 @@
         android:id="@+id/iv_pn_next_btn"
         android:layout_width="60dp"
         android:layout_height="60dp"
-        android:layout_marginBottom="8dp"
-        android:layout_marginEnd="8dp"
-        android:layout_marginRight="8dp"
-        android:layout_marginTop="8dp"
-        app:layout_constraintBottom_toBottomOf="@+id/iv_pn_play_btn"
-        app:layout_constraintLeft_toRightOf="@+id/iv_pn_play_btn"
-        app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toTopOf="@+id/iv_pn_play_btn"
+        android:layout_marginBottom="32dp"
+        android:elevation="100dp"
+        app:layout_constraintBottom_toTopOf="@+id/sb_pn_player"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.5"
+        app:layout_constraintStart_toEndOf="@+id/iv_pn_play_btn"
         app:srcCompat="@drawable/ic_action_next" />
 
     <TextView
         android:id="@+id/tv_panel_artist_name"
         android:layout_width="0dp"
-        android:layout_height="19dp"
-        android:layout_marginLeft="0dp"
+        android:layout_height="20dp"
         android:layout_marginRight="8dp"
-        android:layout_marginTop="0dp"
         android:ellipsize="end"
         android:lines="1"
-        tools:hint="Jeniffer Lopez"
         android:textColor="@color/colorPrimaryText"
         app:layout_constraintHorizontal_bias="0.505"
         app:layout_constraintLeft_toLeftOf="@+id/tv_panel_song_name"
         app:layout_constraintRight_toRightOf="@+id/tv_panel_song_name"
-        app:layout_constraintTop_toBottomOf="@+id/tv_panel_song_name"/>
+        app:layout_constraintTop_toBottomOf="@+id/tv_panel_song_name"
+        tools:hint="Jeniffer Lopez" />
 
     <TextView
         android:id="@+id/tv_panel_song_name"
         android:layout_width="0dp"
-        android:layout_height="29dp"
+        android:layout_height="30dp"
         android:layout_marginLeft="8dp"
-        android:layout_marginTop="4dp"
+        android:layout_marginTop="8dp"
         android:ellipsize="end"
         android:lines="1"
         android:textColor="@color/colorPrimaryText"
@@ -81,22 +81,54 @@
         app:layout_constraintTop_toTopOf="parent"
         tools:hint="On the fllor" />
 
-    <ImageView
+    <de.hdodenhof.circleimageview.CircleImageView
         android:id="@+id/iv_pn_cover_art"
         android:layout_width="250dp"
         android:layout_height="250dp"
         android:layout_marginBottom="8dp"
-        android:layout_marginEnd="8dp"
-        android:layout_marginStart="8dp"
-        android:scaleType="fitXY"
-        app:layout_constraintBottom_toTopOf="@+id/iv_pn_play_btn"
-        app:srcCompat="@drawable/default_main_cover_art"
         android:layout_marginLeft="8dp"
-        app:layout_constraintLeft_toLeftOf="parent"
         android:layout_marginRight="8dp"
-        app:layout_constraintRight_toRightOf="parent"
         android:layout_marginTop="8dp"
-        app:layout_constraintTop_toBottomOf="@+id/tv_panel_artist_name"/>
+        android:elevation="100dp"
+        app:layout_constraintBottom_toTopOf="@+id/iv_pn_play_btn"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/tv_panel_artist_name"
+        app:layout_constraintVertical_bias="0.31"
+        app:srcCompat="@drawable/default_main_cover_art" />
+
+    <ImageView
+        android:id="@+id/iv_pn_cover_art_shadow"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_marginBottom="8dp"
+        android:layout_marginTop="8dp"
+        android:alpha="1"
+        android:elevation="0dp"
+        android:scaleType="centerCrop"
+        app:layout_constraintBottom_toTopOf="@+id/sb_pn_player"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/iv_pn_cover_art"
+        app:srcCompat="@drawable/default_main_cover_art" />
+
+    <ImageView
+        android:id="@+id/iv_pn_cover_art_shadow_white_overlay"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_marginBottom="8dp"
+        android:layout_marginTop="8dp"
+        android:alpha="1"
+        android:background="@drawable/fade_image_background"
+        android:elevation="1dp"
+        android:fadingEdge="horizontal"
+        android:fadingEdgeLength="80dp"
+        android:requiresFadingEdge="horizontal"
+        android:scaleType="fitXY"
+        app:layout_constraintBottom_toTopOf="@+id/sb_pn_player"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/iv_pn_cover_art" />
 
     <SeekBar
         android:id="@+id/sb_pn_player"
@@ -108,7 +140,9 @@
         android:layout_marginLeft="8dp"
         android:layout_marginRight="8dp"
         android:layout_marginStart="8dp"
+        android:elevation="100dp"
         android:max="10"
+
         android:outlineProvider="none"
         android:progress="3"
         android:scrollIndicators="bottom"
@@ -116,7 +150,7 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintRight_toRightOf="parent"/>
+        app:layout_constraintRight_toRightOf="parent" />
 
     <ImageView
         android:id="@+id/iv_pn_action_btn"
@@ -125,19 +159,22 @@
         android:layout_marginBottom="8dp"
         android:layout_marginRight="8dp"
         android:layout_marginTop="8dp"
+        android:elevation="100dp"
         android:scaleType="fitCenter"
+
         app:layout_constraintBottom_toBottomOf="@+id/tv_panel_artist_name"
         app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintTop_toTopOf="@+id/tv_panel_song_name"
-        app:layout_constraintVertical_bias="0.571"
-        />
+        app:layout_constraintVertical_bias="0.571" />
 
     <TextView
         android:id="@+id/tv_pn_total_time"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="8dp"
+        android:elevation="100dp"
         android:text="5:20"
+
         app:layout_constraintBottom_toTopOf="@+id/sb_pn_player"
         app:layout_constraintStart_toStartOf="@+id/sb_pn_player" />
 
@@ -146,7 +183,9 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginEnd="8dp"
+        android:elevation="100dp"
         android:text="1:20:00"
+
         app:layout_constraintBottom_toTopOf="@+id/sb_pn_player"
         app:layout_constraintEnd_toEndOf="@+id/sb_pn_player" />
 

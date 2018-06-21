@@ -23,7 +23,6 @@
         android:layout_marginLeft="8dp"
         android:layout_marginStart="8dp"
         android:layout_marginTop="8dp"
-        android:background="@drawable/music_icon"
         android:scaleType="centerCrop"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintLeft_toLeftOf="parent"
@@ -61,23 +60,21 @@
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent" />
 
-    <TextView
-        android:id="@+id/tv_artist_name"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginBottom="8dp"
-        android:layout_marginRight="0dp"
-        android:ellipsize="end"
-        android:lines="1"
-        android:text="Mr World Wide"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintHorizontal_bias="0.0"
-        app:layout_constraintLeft_toLeftOf="@+id/tv_song_name"
-        app:layout_constraintRight_toRightOf="@+id/tv_song_name"
-        app:layout_constraintTop_toBottomOf="@+id/tv_song_name"
-        android:layout_marginEnd="8dp"
-        app:layout_constraintVertical_bias="0.0"
-        android:layout_marginLeft="8dp" />
+        <TextView
+            android:id="@+id/tv_artist_name"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="8dp"
+            android:ellipsize="end"
+            android:fontFamily="@font/lato"
+            android:lines="1"
+            android:text="Mr World Wide"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintHorizontal_bias="0.0"
+            app:layout_constraintLeft_toLeftOf="@+id/tv_song_name"
+            app:layout_constraintRight_toRightOf="@+id/tv_song_name"
+            app:layout_constraintTop_toBottomOf="@+id/tv_song_name"
+            app:layout_constraintVertical_bias="0.0" />
 
     </android.support.constraint.ConstraintLayout>
 

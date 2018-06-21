@@ -19,10 +19,10 @@ import com.blacpythoz.musik.services.MusicService;
  * Created by deadsec on 10/16/17.
  */
 
-public class NotificationHandler{
+public class NotificationHandler {
 
-     public static Notification createNotification(Context context, SongModel currentSong) {
-         Notification.Builder nbuilder = null;
+    public static Notification createNotification(Context context, SongModel currentSong, boolean playStatus) {
+        Notification.Builder nbuilder = null;
         Intent openAppIntent = new Intent(context, PlayerActivity.class);
         PendingIntent pendingOpenAppIntent = PendingIntent.getActivity(context, 0, openAppIntent, 0);
 
@@ -34,11 +34,16 @@ public class NotificationHandler{
         playIntent.setAction("action.play");
         PendingIntent pplayIntent = PendingIntent.getService(context, 0, playIntent, 0);
 
+        Intent pauseIntent = new Intent(context, MusicService.class);
+        pauseIntent.setAction("action.pause");
+        PendingIntent ppauseIntent = PendingIntent.getService(context, 0, pauseIntent, 0);
+
+
         Intent nextIntent = new Intent(context, MusicService.class);
         nextIntent.setAction("action.next");
         PendingIntent pnextIntent = PendingIntent.getService(context, 0, nextIntent, 0);
 
-        Bitmap bitmap = getBitmap(context,currentSong.getAlbumArt());
+        Bitmap bitmap = getBitmap(context, currentSong.getAlbumArt());
         nbuilder = new Notification.Builder(context)
                 .setContentTitle(currentSong.getTitle())
                 .setTicker(currentSong.getTitle())
@@ -47,17 +52,26 @@ public class NotificationHandler{
                 .setContentIntent(pendingOpenAppIntent)
                 .setOngoing(true)
                 .setLargeIcon(bitmap)
-                .addAction(android.R.drawable.ic_media_previous, "Previous", ppreviousIntent)
-                .addAction(android.R.drawable.ic_media_play, "Toggle", pplayIntent)
-                .addAction(android.R.drawable.ic_media_next, "Next", pnextIntent)
+                .addAction(android.R.drawable.ic_media_previous, "Previous", ppreviousIntent);
+
+        if (playStatus) {
+            nbuilder.addAction(android.R.drawable.ic_media_pause, "Play", ppauseIntent);
+        } else {
+            nbuilder.addAction(android.R.drawable.ic_media_play, "Pause", pplayIntent);
+        }
+
+        nbuilder.addAction(android.R.drawable.ic_media_next, "Next", pnextIntent)
                 .setLargeIcon(bitmap);
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             nbuilder.setStyle(new Notification.MediaStyle());
         }
+
+
         return nbuilder.build();
     }
-      public static Bitmap getBitmap(Context context, String uri) {
+
+    public static Bitmap getBitmap(Context context, String uri) {
         Bitmap bitmap = null;
         try {
             bitmap = MediaStore.Images.Media.getBitmap(context.getContentResolver(), Uri.parse(uri));

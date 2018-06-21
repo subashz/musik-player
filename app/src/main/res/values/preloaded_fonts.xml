@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <array name="preloaded_fonts" translatable="false">
+        <item>@font/dosis</item>
+        <item>@font/dosis_extralight</item>
+        <item>@font/karla</item>
+        <item>@font/lato</item>
+        <item>@font/nunito_light</item>
+        <item>@font/roboto_light</item>
+        <item>@font/titillium_web_light</item>
+    </array>
+</resources>

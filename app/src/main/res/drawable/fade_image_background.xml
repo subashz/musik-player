@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8"?><!--<shape xmlns:android="http://schemas.android.com/apk/res/android"--><!--android:shape="rectangle">--><!--<gradient--><!--android:endColor="#fff"--><!--android:startColor="#00000000"--><!--android:gradientRadius="240dp"--><!--android:type="radial" />-->
+
+<!--&lt;!&ndash;<gradient&ndash;&gt;--><!--&lt;!&ndash;android:centerColor="#00000000"&ndash;&gt;--><!--&lt;!&ndash;android:endColor="#fff"&ndash;&gt;--><!--&lt;!&ndash;android:centerX="50%"&ndash;&gt;--><!--&lt;!&ndash;android:centerY="50%"&ndash;&gt;--><!--&lt;!&ndash;android:gradientRadius="400"&ndash;&gt;--><!--&lt;!&ndash;android:startColor="#00000000"&ndash;&gt;--><!--&lt;!&ndash;android:type="radial" >&ndash;&gt;--><!--&lt;!&ndash;</gradient>&ndash;&gt;-->
+
+
+<!--</shape>-->
+
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <item>
+        <shape>
+            <gradient
+                android:endColor="#fff"
+                android:gradientRadius="240dp"
+                android:startColor="#00000000"
+                android:type="radial" />
+        </shape>
+    </item>
+    <!--<item>-->
+        <!--<shape>-->
+            <!--<gradient-->
+                <!--android:endColor="#fff"-->
+                <!--android:gradientRadius="20dp"-->
+                <!--android:centerY="0%"-->
+                <!--android:centerX="90%"-->
+                <!--android:angle="180"-->
+                <!--android:startColor="#fff"-->
+                <!--android:type="linear"/>-->
+        <!--</shape>-->
+    <!--</item>-->
+
+    <!--<item>-->
+    <!--<shape>-->
+    <!--<gradient-->
+    <!--android:startColor="#fff"-->
+    <!--android:centerColor="@color/transparent"-->
+    <!--android:endColor="#fff"-->
+    <!--android:centerY="40%"-->
+    <!--android:centerX="50%"-->
+    <!--android:angle="0"/>-->
+    <!--</shape>-->
+    <!--</item>-->
+
+
+    <!--<item>-->
+    <!--<shape>-->
+    <!--<gradient-->
+    <!--android:startColor="#fff"-->
+    <!--android:centerColor="@color/transparent"-->
+    <!--android:endColor="#fff"-->
+    <!--android:centerY="50%"-->
+    <!--android:centerX="60%"-->
+    <!--android:angle="90"/>-->
+    <!--</shape>-->
+    <!--</item>-->
+
+    <!--<item>-->
+    <!--<shape>-->
+    <!--<gradient-->
+    <!--android:startColor="#fff"-->
+    <!--android:centerColor="@color/transparent"-->
+    <!--android:endColor="#fff"-->
+    <!--android:centerY="50%"-->
+    <!--android:centerX="60%"-->
+    <!--android:angle="90"/>-->
+    <!--</shape>-->
+    <!--</item>-->
+
+
+</layer-list>

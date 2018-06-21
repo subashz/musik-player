@@ -30,6 +30,7 @@ public class SongDataLab {
     private Context mContext;
     private SQLiteDatabase mDatabase;
     private List<SongModel> songs;
+
     private SongDataLab(Context context) {
         mContext = context.getApplicationContext();
         mDatabase = new SongDbHelper(mContext).getWritableDatabase();
@@ -45,20 +46,38 @@ public class SongDataLab {
     }
 
     public SongModel getSong(long id) {
-        SongCursorWrapper cursorWrapper = querySong("_id="+id,null);
+        SongCursorWrapper cursorWrapper = querySong("_id=" + id, null);
         try {
-            if(cursorWrapper.getCount() != 0) {
+            if (cursorWrapper.getCount() != 0) {
                 cursorWrapper.moveToFirst();
                 return cursorWrapper.getSong();
             }
             return SongModel.EMPTY();
-        }finally {
+        } finally {
             cursorWrapper.close();
         }
     }
+
     public SongModel getRandomSong() {
         Random r = new Random();
-        return songs.get(r.nextInt(songs.size()-1));
+        return songs.get(r.nextInt(songs.size() - 1));
+    }
+
+    public SongModel getNextSong(SongModel currentSong) {
+        try {
+            return songs.get(songs.indexOf(currentSong) + 1);
+        } catch (Exception e) {
+            return getRandomSong();
+        }
+    }
+
+
+    public SongModel getPreviousSong(SongModel currentSong) {
+        try {
+            return songs.get(songs.indexOf(currentSong) - 1);
+        } catch (Exception e) {
+            return getRandomSong();
+        }
     }
 
     public List<SongModel> getSongs() {
@@ -153,8 +172,8 @@ public class SongDataLab {
     private SongCursorWrapper querySong(String whereClause, String[] whereArgs) {
         Uri uri = MediaStore.Audio.Media.EXTERNAL_CONTENT_URI;
         String selection;
-        if(whereClause != null) {
-            selection = MediaStore.Audio.Media.IS_MUSIC + "!=0 AND "+whereClause;
+        if (whereClause != null) {
+            selection = MediaStore.Audio.Media.IS_MUSIC + "!=0 AND " + whereClause;
         } else {
             selection = MediaStore.Audio.Media.IS_MUSIC + "!=0";
         }
