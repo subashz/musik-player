@@ -1,8 +1,23 @@
-# **[WIP] Simple Android Music Player**
+# Music Player Application
 
 ### Features
-- _Can play music_
 
-### Screenshots
+- Fast search and Play
 
-![screenshot_20170903-163336](https://user-images.githubusercontent.com/12681896/30002448-31a19f70-9099-11e7-9b08-61f0d34b15e5.png)
+- Manage playlist Easily
+
+
+## Screen Shots
+  
+  
+  - **Player Preview**
+  - <img src="https://raw.githubusercontent.com/blacpythoz/musik-player/master/screenshots/device-2018-06-22-001146.png" height=500 width=270>
+
+
+  
+  - **Albums Preview**
+  - <img src="https://raw.githubusercontent.com/blacpythoz/musik-player/master/screenshots/device-2018-06-22-001229.png" height=500 width=270>
+  
+  
+  - **Main Player**
+  - <img src="https://raw.githubusercontent.com/blacpythoz/musik-player/master/screenshots/device-2018-06-22-001500.png" height=500 width=270>
